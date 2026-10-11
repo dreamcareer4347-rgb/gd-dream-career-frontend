@@ -1,0 +1,21 @@
+{
+  "name": "GD Dream Career Institute",
+  "short_name": "GD Dream Career",
+  "description": "Student Performance, Academic & Fee Payment Portal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#011F4B",
+  "theme_color": "#011F4B",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
