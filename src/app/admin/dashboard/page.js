@@ -8,11 +8,17 @@ import Footer from '@/components/Footer';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://gd-dream-career-backend.onrender.com';
 
 export default function AdminDashboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminUser, setAdminUser] = useState('');
+  const [adminPin, setAdminPin] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
+
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
-  // Editing state tracker (null means creating new, id means editing existing)
+  // Editing state tracker
   const [editingStudentId, setEditingStudentId] = useState(null);
 
   // 1. Student Form State
@@ -25,10 +31,10 @@ export default function AdminDashboard() {
     attendance: '95%',
     grade: 'A+',
     total_percentage: '88%',
-    english_speaking_score: '88% (Fluent)',
-    deep_learning_score: '90% (Advanced)',
-    written_performance_score: '85% (Good)',
-    math_improvement_score: '92% (Excellent)',
+    english_speaking_score: 'Not Uploaded Yet',
+    deep_learning_score: 'Not Uploaded Yet',
+    written_performance_score: 'Not Uploaded Yet',
+    math_improvement_score: 'Not Uploaded Yet',
     total_fee: 12000,
     paid_fee: 0,
     due_fee: 12000,
@@ -43,6 +49,51 @@ export default function AdminDashboard() {
   const [markForm, setMarkForm] = useState({ student: '', subject_name: '', max_marks: 100, obtained_marks: '', status: 'Pass' });
   const [testCopyFile, setTestCopyFile] = useState(null);
 
+  useEffect(() => {
+    const isSavedAuth = localStorage.getItem('gd_admin_authenticated');
+    if (isSavedAuth === 'true') {
+      setIsAuthenticated(true);
+      fetchStudents();
+    }
+  }, []);
+
+  // Database-backed Admin Login Handler
+  const handleAdminLogin = async (e) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    setAuthError('');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/admin-login/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: adminUser.trim(),
+          secret_pin: adminPin.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setIsAuthenticated(true);
+        localStorage.setItem('gd_admin_authenticated', 'true');
+        fetchStudents();
+      } else {
+        setAuthError(data.message || '❌ Galat Username ya Secret PIN!');
+      }
+    } catch (err) {
+      setAuthError('❌ Server se connect nahi ho pa raha hai.');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('gd_admin_authenticated');
+  };
+
   const fetchStudents = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/students/`);
@@ -54,10 +105,6 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchStudents();
-  }, []);
 
   // Handle Create or Update Student Submit
   const handleStudentSubmit = async (e) => {
@@ -89,8 +136,8 @@ export default function AdminDashboard() {
         setStudentForm({
           name: '', parents_name: '', roll_number: '', result_pin: '', student_class: '',
           attendance: '95%', grade: 'A+', total_percentage: '88%',
-          english_speaking_score: '88% (Fluent)', deep_learning_score: '90% (Advanced)',
-          written_performance_score: '85% (Good)', math_improvement_score: '92% (Excellent)',
+          english_speaking_score: 'Not Uploaded Yet', deep_learning_score: 'Not Uploaded Yet',
+          written_performance_score: 'Not Uploaded Yet', math_improvement_score: 'Not Uploaded Yet',
           total_fee: 12000, paid_fee: 0, due_fee: 12000, fee_status: 'Due Pending',
         });
         setPhotoFile(null);
@@ -105,7 +152,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Trigger Edit Mode for a Student
   const handleEditClick = (student) => {
     setEditingStudentId(student.id);
     setStudentForm({
@@ -117,10 +163,10 @@ export default function AdminDashboard() {
       attendance: student.attendance || '95%',
       grade: student.grade || 'A+',
       total_percentage: student.total_percentage || '88%',
-      english_speaking_score: student.english_speaking_score || '88% (Fluent)',
-      deep_learning_score: student.deep_learning_score || '90% (Advanced)',
-      written_performance_score: student.written_performance_score || '85% (Good)',
-      math_improvement_score: student.math_improvement_score || '92% (Excellent)',
+      english_speaking_score: student.english_speaking_score || 'Not Uploaded Yet',
+      deep_learning_score: student.deep_learning_score || 'Not Uploaded Yet',
+      written_performance_score: student.written_performance_score || 'Not Uploaded Yet',
+      math_improvement_score: student.math_improvement_score || 'Not Uploaded Yet',
       total_fee: student.total_fee || 12000,
       paid_fee: student.paid_fee || 0,
       due_fee: student.due_fee || 12000,
@@ -129,20 +175,18 @@ export default function AdminDashboard() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Cancel Edit Mode
   const handleCancelEdit = () => {
     setEditingStudentId(null);
     setStudentForm({
       name: '', parents_name: '', roll_number: '', result_pin: '', student_class: '',
       attendance: '95%', grade: 'A+', total_percentage: '88%',
-      english_speaking_score: '88% (Fluent)', deep_learning_score: '90% (Advanced)',
-      written_performance_score: '85% (Good)', math_improvement_score: '92% (Excellent)',
+      english_speaking_score: 'Not Uploaded Yet', deep_learning_score: 'Not Uploaded Yet',
+      written_performance_score: 'Not Uploaded Yet', math_improvement_score: 'Not Uploaded Yet',
       total_fee: 12000, paid_fee: 0, due_fee: 12000, fee_status: 'Due Pending',
     });
     setPhotoFile(null);
   };
 
-  // Handle Fee Payment Submit
   const handleFeeSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -163,7 +207,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Handle Subject Mark & Test Copy Submit
   const handleMarkSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
@@ -192,7 +235,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Delete Student
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this student?')) return;
     try {
@@ -206,16 +248,90 @@ export default function AdminDashboard() {
     }
   };
 
+  // --- LOGIN LOCK SCREEN ---
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex flex-col bg-slate-100 text-gray-800">
+        <Navbar />
+        <div className="flex-grow flex items-center justify-center px-4 py-16">
+          <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-xl max-w-md w-full space-y-6">
+            <div className="text-center space-y-2">
+              <div className="w-16 h-16 bg-[#011F4B] text-white rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-md">
+                🔒
+              </div>
+              <h1 className="text-2xl font-black text-[#011F4B]">Admin Database Auth</h1>
+              <p className="text-xs text-gray-500 font-medium">Enter registered Admin Username & Secret PIN.</p>
+            </div>
+
+            <form onSubmit={handleAdminLogin} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#011F4B] mb-2">
+                  Admin Username
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Enter Username (e.g. dev_admin)"
+                  value={adminUser}
+                  onChange={(e) => setAdminUser(e.target.value)}
+                  className="w-full p-3.5 border border-gray-300 rounded-xl bg-slate-50 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#011F4B]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#011F4B] mb-2">
+                  Secret PIN
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Enter Secret PIN"
+                  value={adminPin}
+                  onChange={(e) => setAdminPin(e.target.value)}
+                  className="w-full p-3.5 border border-gray-300 rounded-xl bg-slate-50 text-center text-lg font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-[#011F4B]"
+                />
+              </div>
+
+              {authError && (
+                <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold text-center">
+                  {authError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="w-full bg-[#011F4B] hover:bg-black text-white font-bold py-3.5 rounded-xl transition shadow text-sm"
+              >
+                {loginLoading ? 'Verifying with Database...' : 'Unlock Dashboard 🚀'}
+              </button>
+            </form>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // --- MAIN ADMIN DASHBOARD ---
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-gray-800">
       <Navbar />
 
       <div className="max-w-6xl mx-auto px-4 py-10 w-full space-y-12 flex-grow">
         
-        {/* Banner */}
-        <div className="bg-[#011F4B] text-white p-6 sm:p-8 rounded-3xl shadow-lg">
-          <h1 className="text-2xl sm:text-3xl font-extrabold">⚙️ GD Dream Career - Master Admin Control</h1>
-          <p className="text-sky-200 text-sm mt-1">Manage Students, Fees, Subject Marks, Test Copies & Cloudinary Photos seamlessly.</p>
+        {/* Banner with Logout */}
+        <div className="bg-[#011F4B] text-white p-6 sm:p-8 rounded-3xl shadow-lg flex flex-wrap justify-between items-center gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold">⚙️ GD Dream Career - Master Admin Control</h1>
+            <p className="text-sky-200 text-sm mt-1">Manage Students, Fees, Subject Marks, Test Copies & Cloudinary Photos seamlessly.</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow"
+          >
+            🔒 Lock Admin Panel
+          </button>
         </div>
 
         {message && (
