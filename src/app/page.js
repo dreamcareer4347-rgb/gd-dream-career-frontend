@@ -147,6 +147,117 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 4. Founder & Core Leadership Team Section */}
+      <section className="py-16 lg:py-24 bg-white px-4">
+        <div className="max-w-7xl mx-auto space-y-12">
+          
+          <div className="text-center space-y-3">
+            <span className="text-sky-600 font-bold text-xs sm:text-sm uppercase tracking-wider bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+              — Visionary Leadership & Core Team
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-[#011F4B] tracking-tight">
+              Meet the Pillars of GD Dream Career
+            </h2>
+            <p className="text-gray-600 text-sm sm:text-base max-w-2xl mx-auto">
+              Our experienced leadership dedicated to shaping students' futures with advanced software guidance, robust mathematics, and elite communication skills.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            
+            {/* 1. Dev Sharma */}
+            <div className="bg-slate-50 border border-gray-200 rounded-3xl p-6 text-center shadow-sm hover:shadow-md transition space-y-4">
+              <div className="w-24 h-24 mx-auto rounded-2xl overflow-hidden border-2 border-[#011F4B] shadow-inner bg-sky-900/10">
+                <img 
+                  src="/dev.jpg" 
+                  alt="Dev Sharma" 
+                  className="w-full h-full object-cover"
+                  onError={(e)=>{e.target.src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"}} 
+                />
+              </div>
+              <div>
+                <span className="bg-[#011F4B] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
+                  CEO & Software Developer
+                </span>
+                <h3 className="text-lg font-bold text-[#011F4B] mt-2">Dev Sharma</h3>
+                <p className="text-xs font-semibold text-emerald-600 mt-1">English Soft & Deep Teaching Expert</p>
+              </div>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Guiding students with modern software perspective and advanced English communication techniques.
+              </p>
+            </div>
+
+            {/* 2. Golu Saini */}
+            <div className="bg-slate-50 border border-gray-200 rounded-3xl p-6 text-center shadow-sm hover:shadow-md transition space-y-4">
+              <div className="w-24 h-24 mx-auto rounded-2xl overflow-hidden border-2 border-emerald-600 shadow-inner bg-emerald-900/10">
+                <img 
+                  src="/golu.jpg" 
+                  alt="Golu Saini" 
+                  className="w-full h-full object-cover"
+                  onError={(e)=>{e.target.src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400"}} 
+                />
+              </div>
+              <div>
+                <span className="bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
+                  Founder & Management
+                </span>
+                <h3 className="text-lg font-bold text-[#011F4B] mt-2">Golu Saini</h3>
+                <p className="text-xs font-semibold text-emerald-600 mt-1">Mathematics Teacher</p>
+              </div>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Overseeing institute administration and strengthening student mathematical foundations.
+              </p>
+            </div>
+
+            {/* 3. Sachin */}
+            <div className="bg-slate-50 border border-gray-200 rounded-3xl p-6 text-center shadow-sm hover:shadow-md transition space-y-4">
+              <div className="w-24 h-24 mx-auto rounded-2xl overflow-hidden border-2 border-sky-600 shadow-inner bg-sky-900/10">
+                <img 
+                  src="/sachin.jpg" 
+                  alt="Sachin" 
+                  className="w-full h-full object-cover"
+                  onError={(e)=>{e.target.src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400"}} 
+                />
+              </div>
+              <div>
+                <span className="bg-sky-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
+                  Founder & Investor
+                </span>
+                <h3 className="text-lg font-bold text-[#011F4B] mt-2">Sachin</h3>
+                <p className="text-xs font-semibold text-emerald-600 mt-1">Strategic Growth & Investor</p>
+              </div>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Fueling institutional infrastructure expansion and long-term educational excellence.
+              </p>
+            </div>
+
+            {/* 4. Puja Sharma */}
+            <div className="bg-slate-50 border border-gray-200 rounded-3xl p-6 text-center shadow-sm hover:shadow-md transition space-y-4">
+              <div className="w-24 h-24 mx-auto rounded-2xl overflow-hidden border-2 border-indigo-600 shadow-inner bg-indigo-900/10">
+                <img 
+                  src="/puja.jpg" 
+                  alt="Puja Sharma" 
+                  className="w-full h-full object-cover"
+                  onError={(e)=>{e.target.src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400"}} 
+                />
+              </div>
+              <div>
+                <span className="bg-indigo-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
+                  Head Teacher
+                </span>
+                <h3 className="text-lg font-bold text-[#011F4B] mt-2">Puja Sharma</h3>
+                <p className="text-xs font-semibold text-emerald-600 mt-1">Academic Direction & Teaching</p>
+              </div>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Directing daily classroom instruction, student discipline, and academic progress.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
       <Footer />
     </div>
   );
