@@ -20,6 +20,9 @@ export default function ContactUs() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // <--- YAHAN APNA WHATSAPP NUMBER SET KAREIN (Without '+' or spaces, e.g. 919876543210) --->
+  const ADMIN_WHATSAPP_NUMBER = "919982216542"; 
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -30,16 +33,52 @@ export default function ContactUs() {
     setError('');
 
     try {
-      // Yahan hum baad me Django API endpoint connect karenge
-      console.log('Inquiry data submitted:', formData);
-      
-      // Simulate API network delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+      // 1. Django Backend Database me save karna
+      const response = await fetch('https://gd-dream-career-backend.onrender.com/api/inquiries/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Database response was not OK');
+      }
+
       setSubmitted(true);
       setLoading(false);
+
+      // 2. WhatsApp message text format karna
+      const waMessage = 
+        `🔔 *New Inquiry Received!*%0A%0A` +
+        `👤 *Name:* ${encodeURIComponent(formData.name)}%0A` +
+        `📱 *Mobile:* ${encodeURIComponent(formData.mobile)}%0A` +
+        `✉️ *Email:* ${encodeURIComponent(formData.email || 'N/A')}%0A` +
+        `🎓 *Class:* ${encodeURIComponent(formData.student_class)}%0A` +
+        `📚 *Course:* ${encodeURIComponent(formData.interested_course)}%0A` +
+        `📋 *Inquiry Type:* ${encodeURIComponent(formData.inquiry_type)}%0A` +
+        `💬 *Message:* ${encodeURIComponent(formData.message || 'N/A')}`;
+
+      // 3. Direct WhatsApp open karna
+      const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${waMessage}`;
+      window.open(whatsappUrl, '_blank');
+
     } catch (err) {
-      setError('Kuch error aa gaya. Kripya fir se koshish karein.');
+      console.error('Inquiry Submission Error:', err);
+      // Agar backend issue bhi aaye tab bhi WhatsApp par redirect allow karna
+      const waMessage = 
+        `🔔 *New Inquiry Received!*%0A%0A` +
+        `👤 *Name:* ${encodeURIComponent(formData.name)}%0A` +
+        `📱 *Mobile:* ${encodeURIComponent(formData.mobile)}%0A` +
+        `🎓 *Class:* ${encodeURIComponent(formData.student_class)}%0A` +
+        `📚 *Course:* ${encodeURIComponent(formData.interested_course)}%0A` +
+        `💬 *Message:* ${encodeURIComponent(formData.message || 'N/A')}`;
+
+      const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${waMessage}`;
+      window.open(whatsappUrl, '_blank');
+
+      setSubmitted(true);
       setLoading(false);
     }
   };
@@ -73,7 +112,9 @@ export default function ContactUs() {
           {submitted ? (
             <div className="bg-green-100 border border-green-400 text-green-700 px-6 py-6 rounded-2xl text-center space-y-3">
               <h3 className="font-bold text-xl">Thank You!</h3>
-              <p className="text-sm">Aapki inquiry successfully submit ho gayi hai. Humari team jald hi aapse contact karegi.</p>
+              <p className="text-sm">
+                Aapki inquiry successfully submit ho gayi hai aur WhatsApp par redirect kar di gayi hai. Humari team jald hi aapse contact karegi.
+              </p>
               <button 
                 onClick={() => { 
                   setSubmitted(false); 
@@ -214,9 +255,9 @@ export default function ContactUs() {
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className="bg-[#011F4B] hover:bg-black text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition duration-150 w-full sm:w-auto"
+                  className="bg-[#011F4B] hover:bg-black text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition duration-150 w-full sm:w-auto flex items-center justify-center gap-2 mx-auto"
                 >
-                  {loading ? 'Submitting...' : 'Submit Inquiry'}
+                  {loading ? 'Submitting...' : 'Submit Inquiry via WhatsApp'}
                 </button>
               </div>
             </form>
