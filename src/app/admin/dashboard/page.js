@@ -1,3 +1,4 @@
+// File path: frontend/src/app/admin/page.js
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -35,7 +36,7 @@ export default function AdminDashboard() {
   // 2. Fee Payment Form State
   const [feeForm, setFeeForm] = useState({ student: '', month_name: '', amount_paid: '', payment_date: '', payment_mode: 'Cash', receipt_note: '' });
 
-  // 3. Subject Marks Form State
+  // 3. Subject Marks Form State (Updated with Dropdown Options)
   const [markForm, setMarkForm] = useState({ student: '', subject_name: '', max_marks: 100, obtained_marks: '', status: 'Pass' });
   const [testCopyFile, setTestCopyFile] = useState(null);
 
@@ -71,7 +72,7 @@ export default function AdminDashboard() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/students/`, {
         method: 'POST',
-        body: data, // No Content-Type header so browser sets multipart boundary automatically
+        body: data,
       });
 
       if (res.ok) {
@@ -261,7 +262,7 @@ export default function AdminDashboard() {
             </form>
           </div>
 
-          {/* Subject Marks & Test Copy Form */}
+          {/* Subject Marks & Test Copy Form (With Dropdown Selection) */}
           <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-md">
             <h2 className="text-lg font-bold text-[#011F4B] mb-4">📊 3. Add Subject Marks & Test Copy</h2>
             <form onSubmit={handleMarkSubmit} className="space-y-4">
@@ -272,11 +273,26 @@ export default function AdminDashboard() {
                   {students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.roll_number})</option>)}
                 </select>
               </div>
+              
               <div className="grid grid-cols-3 gap-2">
-                <input type="text" required placeholder="Subject Name" value={markForm.subject_name} onChange={(e)=>setMarkForm({...markForm, subject_name:e.target.value})} className="p-3 border rounded-xl bg-slate-50 text-sm col-span-1" />
+                {/* Subject Dropdown for Exact Performance Mapping */}
+                <select 
+                  required 
+                  value={markForm.subject_name} 
+                  onChange={(e)=>setMarkForm({...markForm, subject_name:e.target.value})} 
+                  className="p-3 border rounded-xl bg-slate-50 text-sm col-span-1"
+                >
+                  <option value="">-- Select Skill --</option>
+                  <option value="English Speaking">English Speaking</option>
+                  <option value="Deep English Learning">Deep English Learning</option>
+                  <option value="Written Performance">Written Performance</option>
+                  <option value="Math Improvement">Math Improvement</option>
+                </select>
+
                 <input type="number" required placeholder="Obtained" value={markForm.obtained_marks} onChange={(e)=>setMarkForm({...markForm, obtained_marks:e.target.value})} className="p-3 border rounded-xl bg-slate-50 text-sm col-span-1" />
                 <input type="number" required placeholder="Max Marks" value={markForm.max_marks} onChange={(e)=>setMarkForm({...markForm, max_marks:e.target.value})} className="p-3 border rounded-xl bg-slate-50 text-sm col-span-1" />
               </div>
+
               <div>
                 <label className="block text-xs font-bold uppercase mb-1">Test Copy File / PDF Upload</label>
                 <input type="file" accept=".pdf,image/*" onChange={(e)=>setTestCopyFile(e.target.files[0])} className="w-full p-2 border rounded-xl bg-slate-50 text-xs text-gray-500" />
