@@ -12,6 +12,9 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
+  // Editing state tracker (null means creating new, id means editing existing)
+  const [editingStudentId, setEditingStudentId] = useState(null);
+
   // 1. Student Form State
   const [studentForm, setStudentForm] = useState({
     name: '',
@@ -36,7 +39,7 @@ export default function AdminDashboard() {
   // 2. Fee Payment Form State
   const [feeForm, setFeeForm] = useState({ student: '', month_name: '', amount_paid: '', payment_date: '', payment_mode: 'Cash', receipt_note: '' });
 
-  // 3. Subject Marks Form State (Updated with Dropdown Options)
+  // 3. Subject Marks Form State
   const [markForm, setMarkForm] = useState({ student: '', subject_name: '', max_marks: 100, obtained_marks: '', status: 'Pass' });
   const [testCopyFile, setTestCopyFile] = useState(null);
 
@@ -56,7 +59,7 @@ export default function AdminDashboard() {
     fetchStudents();
   }, []);
 
-  // Handle Student Submit
+  // Handle Create or Update Student Submit
   const handleStudentSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
@@ -70,13 +73,19 @@ export default function AdminDashboard() {
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/students/`, {
-        method: 'POST',
+      const url = editingStudentId 
+        ? `${API_BASE_URL}/api/students/${editingStudentId}/` 
+        : `${API_BASE_URL}/api/students/`;
+      
+      const method = editingStudentId ? 'PATCH' : 'POST';
+
+      const res = await fetch(url, {
+        method: method,
         body: data,
       });
 
       if (res.ok) {
-        setMessage('✅ Student successfully added with Cloudinary photo!');
+        setMessage(editingStudentId ? '✅ Student profile successfully updated!' : '✅ Student successfully registered!');
         setStudentForm({
           name: '', parents_name: '', roll_number: '', result_pin: '', student_class: '',
           attendance: '95%', grade: 'A+', total_percentage: '88%',
@@ -85,6 +94,7 @@ export default function AdminDashboard() {
           total_fee: 12000, paid_fee: 0, due_fee: 12000, fee_status: 'Due Pending',
         });
         setPhotoFile(null);
+        setEditingStudentId(null);
         fetchStudents();
       } else {
         const err = await res.json();
@@ -93,6 +103,43 @@ export default function AdminDashboard() {
     } catch (err) {
       setMessage('❌ Server connection failed.');
     }
+  };
+
+  // Trigger Edit Mode for a Student
+  const handleEditClick = (student) => {
+    setEditingStudentId(student.id);
+    setStudentForm({
+      name: student.name || '',
+      parents_name: student.parents_name || '',
+      roll_number: student.roll_number || '',
+      result_pin: student.result_pin || '',
+      student_class: student.student_class || '',
+      attendance: student.attendance || '95%',
+      grade: student.grade || 'A+',
+      total_percentage: student.total_percentage || '88%',
+      english_speaking_score: student.english_speaking_score || '88% (Fluent)',
+      deep_learning_score: student.deep_learning_score || '90% (Advanced)',
+      written_performance_score: student.written_performance_score || '85% (Good)',
+      math_improvement_score: student.math_improvement_score || '92% (Excellent)',
+      total_fee: student.total_fee || 12000,
+      paid_fee: student.paid_fee || 0,
+      due_fee: student.due_fee || 12000,
+      fee_status: student.fee_status || 'Due Pending',
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Cancel Edit Mode
+  const handleCancelEdit = () => {
+    setEditingStudentId(null);
+    setStudentForm({
+      name: '', parents_name: '', roll_number: '', result_pin: '', student_class: '',
+      attendance: '95%', grade: 'A+', total_percentage: '88%',
+      english_speaking_score: '88% (Fluent)', deep_learning_score: '90% (Advanced)',
+      written_performance_score: '85% (Good)', math_improvement_score: '92% (Excellent)',
+      total_fee: 12000, paid_fee: 0, due_fee: 12000, fee_status: 'Due Pending',
+    });
+    setPhotoFile(null);
   };
 
   // Handle Fee Payment Submit
@@ -177,9 +224,21 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* SECTION 1: Add New Student */}
+        {/* SECTION 1: Register or Edit Student */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md">
-          <h2 className="text-lg font-bold text-[#011F4B] mb-6">➕ 1. Register New Student</h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-bold text-[#011F4B]">
+              {editingStudentId ? '✏️ Edit Student Profile' : '➕ 1. Register New Student'}
+            </h2>
+            {editingStudentId && (
+              <button 
+                onClick={handleCancelEdit}
+                className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-lg font-bold transition"
+              >
+                Cancel Edit
+              </button>
+            )}
+          </div>
           
           <form onSubmit={handleStudentSubmit} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
@@ -196,7 +255,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <label className="block text-xs font-bold uppercase mb-1">4-Digit PIN *</label>
-              <input type="password" required maxLength={4} value={studentForm.result_pin} onChange={(e)=>setStudentForm({...studentForm, result_pin:e.target.value})} className="w-full p-3 border rounded-xl bg-slate-50 text-sm" />
+              <input type="text" required maxLength={4} value={studentForm.result_pin} onChange={(e)=>setStudentForm({...studentForm, result_pin:e.target.value})} className="w-full p-3 border rounded-xl bg-slate-50 text-sm" />
             </div>
             <div>
               <label className="block text-xs font-bold uppercase mb-1">Class / Batch *</label>
@@ -223,8 +282,8 @@ export default function AdminDashboard() {
             </div>
 
             <div className="sm:col-span-3 pt-2">
-              <button type="submit" className="w-full bg-[#011F4B] hover:bg-black text-white font-bold py-3.5 rounded-xl transition shadow">
-                Save Student Record
+              <button type="submit" className={`w-full text-white font-bold py-3.5 rounded-xl transition shadow ${editingStudentId ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-[#011F4B] hover:bg-black'}`}>
+                {editingStudentId ? 'Update Student Profile' : 'Save Student Record'}
               </button>
             </div>
           </form>
@@ -262,7 +321,7 @@ export default function AdminDashboard() {
             </form>
           </div>
 
-          {/* Subject Marks & Test Copy Form (With Dropdown Selection) */}
+          {/* Subject Marks & Test Copy Form */}
           <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-md">
             <h2 className="text-lg font-bold text-[#011F4B] mb-4">📊 3. Add Subject Marks & Test Copy</h2>
             <form onSubmit={handleMarkSubmit} className="space-y-4">
@@ -275,7 +334,6 @@ export default function AdminDashboard() {
               </div>
               
               <div className="grid grid-cols-3 gap-2">
-                {/* Subject Dropdown for Exact Performance Mapping */}
                 <select 
                   required 
                   value={markForm.subject_name} 
@@ -340,7 +398,13 @@ export default function AdminDashboard() {
                       <td className="py-3 px-4">{student.name}</td>
                       <td className="py-3 px-4">{student.student_class}</td>
                       <td className="py-3 px-4">₹{student.paid_fee} / ₹{student.total_fee}</td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3 px-4 text-right space-x-2">
+                        <button
+                          onClick={() => handleEditClick(student)}
+                          className="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm"
+                        >
+                          Edit
+                        </button>
                         <button
                           onClick={() => handleDelete(student.id)}
                           className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm"
