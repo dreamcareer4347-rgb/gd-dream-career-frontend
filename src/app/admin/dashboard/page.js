@@ -18,27 +18,17 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
-  // Editing state tracker
+  // Track editing states
   const [editingStudentId, setEditingStudentId] = useState(null);
+  const [editingMarkId, setEditingMarkId] = useState(null);
 
   // 1. Student Form State
   const [studentForm, setStudentForm] = useState({
-    name: '',
-    parents_name: '',
-    roll_number: '',
-    result_pin: '',
-    student_class: '',
-    attendance: '95%',
-    grade: 'A+',
-    total_percentage: '88%',
-    english_speaking_score: 'Not Uploaded Yet',
-    deep_learning_score: 'Not Uploaded Yet',
-    written_performance_score: 'Not Uploaded Yet',
-    math_improvement_score: 'Not Uploaded Yet',
-    total_fee: 12000,
-    paid_fee: 0,
-    due_fee: 12000,
-    fee_status: 'Due Pending',
+    name: '', parents_name: '', roll_number: '', result_pin: '', student_class: '',
+    attendance: '95%', grade: 'A+', total_percentage: '88%',
+    english_speaking_score: 'Not Uploaded Yet', deep_learning_score: 'Not Uploaded Yet',
+    written_performance_score: 'Not Uploaded Yet', math_improvement_score: 'Not Uploaded Yet',
+    total_fee: 12000, paid_fee: 0, due_fee: 12000, fee_status: 'Due Pending',
   });
   const [photoFile, setPhotoFile] = useState(null);
 
@@ -57,7 +47,6 @@ export default function AdminDashboard() {
     }
   }, []);
 
-  // Database-backed Admin Login Handler
   const handleAdminLogin = async (e) => {
     e.preventDefault();
     setLoginLoading(true);
@@ -106,7 +95,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Handle Create or Update Student Submit
   const handleStudentSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
@@ -126,13 +114,10 @@ export default function AdminDashboard() {
       
       const method = editingStudentId ? 'PATCH' : 'POST';
 
-      const res = await fetch(url, {
-        method: method,
-        body: data,
-      });
+      const res = await fetch(url, { method: method, body: data });
 
       if (res.ok) {
-        setMessage(editingStudentId ? '✅ Student profile successfully updated!' : '✅ Student successfully registered!');
+        setMessage(editingStudentId ? '✅ Student profile updated!' : '✅ Student registered!');
         setStudentForm({
           name: '', parents_name: '', roll_number: '', result_pin: '', student_class: '',
           attendance: '95%', grade: 'A+', total_percentage: '88%',
@@ -207,7 +192,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // Multiple Test Copy Photos Submit Handler
+  // Add OR Update Subject Mark & Test Copy
   const handleMarkSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
@@ -215,7 +200,6 @@ export default function AdminDashboard() {
       data.append(key, markForm[key]);
     }
     
-    // Multiple files loop append
     if (testCopyFile && testCopyFile.length > 0) {
       for (let i = 0; i < testCopyFile.length; i++) {
         data.append('test_copy', testCopyFile[i]);
@@ -223,20 +207,75 @@ export default function AdminDashboard() {
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/subject-marks/`, {
-        method: 'POST',
-        body: data,
-      });
+      const url = editingMarkId 
+        ? `${API_BASE_URL}/api/subject-marks/${editingMarkId}/` 
+        : `${API_BASE_URL}/api/subject-marks/`;
+      const method = editingMarkId ? 'PATCH' : 'POST';
+
+      const res = await fetch(url, { method, body: data });
       if (res.ok) {
-        setMessage('📊 Subject marks and combined test copies uploaded successfully!');
+        setMessage(editingMarkId ? '✏️ Subject mark & test copy updated!' : '📊 Subject marks & test copy uploaded!');
         setMarkForm({ student: '', subject_name: '', max_marks: 100, obtained_marks: '', status: 'Pass' });
         setTestCopyFile(null);
+        setEditingMarkId(null);
         fetchStudents();
       } else {
-        setMessage('❌ Error uploading marks.');
+        setMessage('❌ Error saving marks.');
       }
     } catch (err) {
       setMessage('❌ Server error.');
+    }
+  };
+
+  const handleEditMarkClick = (mark) => {
+    setEditingMarkId(mark.id);
+    setMarkForm({
+      student: mark.student,
+      subject_name: mark.subject_name,
+      max_marks: mark.max_marks,
+      obtained_marks: mark.obtained_marks,
+      status: mark.status || 'Pass',
+    });
+    window.scrollTo({ top: 400, behavior: 'smooth' });
+  };
+
+  const handleCancelMarkEdit = () => {
+    setEditingMarkId(null);
+    setMarkForm({ student: '', subject_name: '', max_marks: 100, obtained_marks: '', status: 'Pass' });
+    setTestCopyFile(null);
+  };
+
+  // Delete Test Copy File Only
+  const handleDeleteTestCopy = async (markId) => {
+    if (!confirm('Kya aap is test copy PDF file ko delete karna chahte hain?')) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/subject-marks/${markId}/delete_test_copy/`, {
+        method: 'POST',
+      });
+      if (res.ok) {
+        setMessage('🗑️ Test copy file deleted!');
+        fetchStudents();
+      } else {
+        alert('Failed to delete file.');
+      }
+    } catch (err) {
+      alert('Server error.');
+    }
+  };
+
+  // Delete Subject Mark Record Completely
+  const handleDeleteMarkRecord = async (markId) => {
+    if (!confirm('Kya aap is pure mark record ko delete karna chahte hain?')) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/subject-marks/${markId}/`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setMessage('🗑️ Subject mark record deleted!');
+        fetchStudents();
+      }
+    } catch (err) {
+      alert('Delete failed.');
     }
   };
 
@@ -253,7 +292,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // --- LOGIN LOCK SCREEN ---
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col bg-slate-100 text-gray-800">
@@ -276,7 +314,7 @@ export default function AdminDashboard() {
                 <input
                   type="text"
                   required
-                  placeholder="Enter Username (e.g. gd)"
+                  placeholder="Enter Username"
                   value={adminUser}
                   onChange={(e) => setAdminUser(e.target.value)}
                   className="w-full p-3.5 border border-gray-300 rounded-xl bg-slate-50 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#011F4B]"
@@ -318,7 +356,6 @@ export default function AdminDashboard() {
     );
   }
 
-  // --- MAIN ADMIN DASHBOARD ---
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-gray-800">
       <Navbar />
@@ -444,7 +481,17 @@ export default function AdminDashboard() {
 
           {/* Subject Marks & Test Copy Form */}
           <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-md">
-            <h2 className="text-lg font-bold text-[#011F4B] mb-4">📊 3. Add Subject Marks & Test Copy</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-[#011F4B]">
+                {editingMarkId ? '✏️ Edit Subject Mark & Replace File' : '📊 3. Add Subject Marks & Test Copy'}
+              </h2>
+              {editingMarkId && (
+                <button onClick={handleCancelMarkEdit} className="text-xs bg-gray-200 px-2.5 py-1 rounded font-bold">
+                  Cancel
+                </button>
+              )}
+            </div>
+
             <form onSubmit={handleMarkSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold uppercase mb-1">Select Student *</label>
@@ -461,7 +508,7 @@ export default function AdminDashboard() {
                   onChange={(e)=>setMarkForm({...markForm, subject_name:e.target.value})} 
                   className="p-3 border rounded-xl bg-slate-50 text-sm col-span-1"
                 >
-                  <option value="">-- Select Skill --</option>
+                  <option value="">-- Skill --</option>
                   <option value="English Speaking">English Speaking</option>
                   <option value="Deep English Learning">Deep English Learning</option>
                   <option value="Written Performance">Written Performance</option>
@@ -473,7 +520,7 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase mb-1">Test Copy Photos / PDFs (Multiple Select)</label>
+                <label className="block text-xs font-bold uppercase mb-1">Test Copy Photos / PDFs {editingMarkId ? '(Select to replace current file)' : '(Multiple Select)'}</label>
                 <input 
                   type="file" 
                   accept=".pdf,image/*" 
@@ -481,18 +528,82 @@ export default function AdminDashboard() {
                   onChange={(e)=>setTestCopyFile(e.target.files)} 
                   className="w-full p-2 border rounded-xl bg-slate-50 text-xs text-gray-500" 
                 />
-                <p className="text-[10px] text-gray-400 mt-1">Aap ek sath 2-3 photos select kar sakte hain, sabhi automatic PDF me jud jayengi.</p>
               </div>
 
-              <button type="submit" className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 rounded-xl transition shadow">
-                Upload Marks & Test Copy
+              <button type="submit" className={`w-full text-white font-bold py-3 rounded-xl transition shadow ${editingMarkId ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-sky-600 hover:bg-sky-700'}`}>
+                {editingMarkId ? 'Update Mark Record' : 'Upload Marks & Test Copy'}
               </button>
             </form>
           </div>
 
         </div>
 
-        {/* SECTION 3: Students Table & Management */}
+        {/* SECTION 3: Subject Marks & Test Copies Management Control Table */}
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md">
+          <h2 className="text-lg font-bold text-[#011F4B] mb-4">📑 Test Copies & Subject Marks Management</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b text-xs uppercase text-gray-600">
+                  <th className="py-3 px-4">Student</th>
+                  <th className="py-3 px-4">Subject / Skill</th>
+                  <th className="py-3 px-4">Marks</th>
+                  <th className="py-3 px-4">Test Copy Status</th>
+                  <th className="py-3 px-4 text-right">Control Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {students.flatMap(student => 
+                  (student.subjects || []).map(mark => (
+                    <tr key={mark.id} className="hover:bg-slate-50">
+                      <td className="py-3 px-4 font-bold">{student.name} ({student.roll_number})</td>
+                      <td className="py-3 px-4">{mark.subject_name}</td>
+                      <td className="py-3 px-4 font-semibold">{mark.obtained_marks} / {mark.max_marks}</td>
+                      <td className="py-3 px-4">
+                        {mark.test_copy ? (
+                          <a 
+                            href={`${API_BASE_URL}${mark.test_copy}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-xs font-bold text-sky-600 hover:underline bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200"
+                          >
+                            📄 View PDF ({mark.test_copy_name || 'File'})
+                          </a>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">No Copy Uploaded</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right space-x-2">
+                        <button
+                          onClick={() => handleEditMarkClick(mark)}
+                          className="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
+                        >
+                          ✏️ Edit / Replace
+                        </button>
+                        {mark.test_copy && (
+                          <button
+                            onClick={() => handleDeleteTestCopy(mark.id)}
+                            className="bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
+                          >
+                            🗑️ File Delete
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteMarkRecord(mark.id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
+                        >
+                          ❌ Delete Mark
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* SECTION 4: Registered Students Directory */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md">
           <h2 className="text-lg font-bold text-[#011F4B] mb-4">📋 Registered Students Directory ({students.length})</h2>
 
@@ -532,13 +643,13 @@ export default function AdminDashboard() {
                           onClick={() => handleEditClick(student)}
                           className="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm"
                         >
-                          Edit
+                          Edit Profile
                         </button>
                         <button
                           onClick={() => handleDelete(student.id)}
                           className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm"
                         >
-                          Delete
+                          Delete Student
                         </button>
                       </td>
                     </tr>
