@@ -223,7 +223,7 @@ export default function Home() {
                 <span className="bg-sky-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase">
                   Founder & Investor
                 </span>
-                <h3 className="text-lg font-bold text-[#011F4B] mt-2">Sachin</h3>
+                <h3 className="text-lg font-bold text-[#011F4B] mt-2">Sachin Sharma</h3>
                 <p className="text-xs font-semibold text-emerald-600 mt-1">Strategic Growth & Investor</p>
               </div>
               <p className="text-xs text-gray-600 leading-relaxed">
