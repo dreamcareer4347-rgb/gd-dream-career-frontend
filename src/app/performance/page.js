@@ -85,13 +85,23 @@ export default function StudentPerformance() {
     }, 300);
   };
 
-  // --- Dynamic Monthly Fee Calculation ---
-  const totalPaidFromHistory = studentData?.fee_history 
-    ? studentData.fee_history.reduce((sum, item) => sum + Number(item.amount_paid || 0), 0)
-    : Number(studentData?.paid_fee || 0);
+  // --- Dynamic Current Month Fee Calculation ---
+  const today = new Date();
+  const currentMonthName = today.toLocaleString('default', { month: 'long' }); // e.g., "October"
+  const currentYear = today.getFullYear();
+  const displayCurrentMonth = `${currentMonthName} ${currentYear}`; // e.g., "October 2026"
 
-  const totalFee = Number(studentData?.total_fee || 0);
-  const dueFee = Math.max(0, totalFee - totalPaidFromHistory);
+  const monthlyFeeAmount = Number(studentData?.total_fee || 1000);
+
+  // Check how much paid for the current running month
+  const currentMonthPaid = studentData?.fee_history
+    ? studentData.fee_history
+        .filter(item => (item.month_name || '').toLowerCase().includes(currentMonthName.toLowerCase()))
+        .reduce((sum, item) => sum + Number(item.amount_paid || 0), 0)
+    : 0;
+
+  const currentMonthDue = Math.max(0, monthlyFeeAmount - currentMonthPaid);
+  const isCurrentMonthPaid = currentMonthDue === 0 && currentMonthPaid > 0;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-gray-800">
@@ -125,7 +135,7 @@ export default function StudentPerformance() {
                 required
                 value={rollNumber}
                 onChange={(e) => setRollNumber(e.target.value)}
-                placeholder="e.g. 1001"
+                placeholder="e.g. 1012"
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#011F4B] bg-slate-50 text-sm font-medium"
               />
             </div>
@@ -240,7 +250,7 @@ export default function StudentPerformance() {
             {/* Main Content Area */}
             <div className="p-6 sm:p-8 space-y-8">
               
-              {/* Top Summary Cards (Attendance & Fee Status) */}
+              {/* Top Summary Cards (Attendance & Dynamic Current Month Fee Status) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:hidden">
                 
                 {/* Attendance Card */}
@@ -253,29 +263,31 @@ export default function StudentPerformance() {
                   <div className="text-4xl">📅</div>
                 </div>
 
-                {/* Fee Status Card */}
+                {/* Dynamic Current Month Fee Status Card */}
                 <div className="p-5 bg-emerald-50/60 rounded-2xl border border-emerald-100 space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide">Fee Details & Status</span>
+                    <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide">
+                      Fee Details & Status ({displayCurrentMonth})
+                    </span>
                     <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
-                      dueFee === 0 ? 'bg-emerald-200 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                      isCurrentMonthPaid ? 'bg-emerald-200 text-emerald-800' : 'bg-amber-100 text-amber-800'
                     }`}>
-                      {dueFee === 0 ? 'Fully Paid' : 'Due Pending'}
+                      {isCurrentMonthPaid ? `${currentMonthName} Paid` : `${currentMonthName} Due`}
                     </span>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-2 pt-1 text-center">
                     <div className="bg-white p-2 rounded-xl border border-emerald-100">
-                      <p className="text-[10px] text-gray-500 uppercase font-bold">Total Fee</p>
-                      <p className="font-extrabold text-[#011F4B] text-sm">₹{totalFee}</p>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold">Monthly Fee</p>
+                      <p className="font-extrabold text-[#011F4B] text-sm">₹{monthlyFeeAmount}</p>
                     </div>
                     <div className="bg-white p-2 rounded-xl border border-emerald-100">
-                      <p className="text-[10px] text-gray-500 uppercase font-bold">Total Paid</p>
-                      <p className="font-extrabold text-emerald-600 text-sm">₹{totalPaidFromHistory}</p>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold">{currentMonthName} Paid</p>
+                      <p className="font-extrabold text-emerald-600 text-sm">₹{currentMonthPaid}</p>
                     </div>
                     <div className="bg-white p-2 rounded-xl border border-emerald-100">
-                      <p className="text-[10px] text-gray-500 uppercase font-bold">Due Amount</p>
-                      <p className="font-extrabold text-red-600 text-sm">₹{dueFee}</p>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold">Current Due</p>
+                      <p className="font-extrabold text-red-600 text-sm">₹{currentMonthDue}</p>
                     </div>
                   </div>
                 </div>

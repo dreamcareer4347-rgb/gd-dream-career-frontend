@@ -18,12 +18,14 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
-  // Search filter state for marks management table
+  // Search filter states
   const [markSearchQuery, setMarkSearchQuery] = useState('');
+  const [feeSearchQuery, setFeeSearchQuery] = useState('');
 
   // Track editing states
   const [editingStudentId, setEditingStudentId] = useState(null);
   const [editingMarkId, setEditingMarkId] = useState(null);
+  const [editingFeeId, setEditingFeeId] = useState(null);
 
   // 1. Student Form State
   const [studentForm, setStudentForm] = useState({
@@ -178,20 +180,59 @@ export default function AdminDashboard() {
   const handleFeeSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_BASE_URL}/api/fee-payments/`, {
-        method: 'POST',
+      const url = editingFeeId
+        ? `${API_BASE_URL}/api/fee-payments/${editingFeeId}/`
+        : `${API_BASE_URL}/api/fee-payments/`;
+      const method = editingFeeId ? 'PATCH' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(feeForm),
       });
       if (res.ok) {
-        setMessage('💰 Fee transaction recorded successfully!');
+        setMessage(editingFeeId ? '✏️ Fee transaction record updated!' : '💰 Fee transaction recorded successfully!');
         setFeeForm({ student: '', month_name: '', amount_paid: '', payment_date: '', payment_mode: 'Cash', receipt_note: '' });
+        setEditingFeeId(null);
         fetchStudents();
       } else {
         setMessage('❌ Error recording fee.');
       }
     } catch (err) {
       setMessage('❌ Server error.');
+    }
+  };
+
+  const handleEditFeeClick = (fee) => {
+    setEditingFeeId(fee.id);
+    setFeeForm({
+      student: fee.student,
+      month_name: fee.month_name,
+      amount_paid: fee.amount_paid,
+      payment_date: fee.payment_date,
+      payment_mode: fee.payment_mode || 'Cash',
+      receipt_note: fee.receipt_note || '',
+    });
+    window.scrollTo({ top: 300, behavior: 'smooth' });
+  };
+
+  const handleCancelFeeEdit = () => {
+    setEditingFeeId(null);
+    setFeeForm({ student: '', month_name: '', amount_paid: '', payment_date: '', payment_mode: 'Cash', receipt_note: '' });
+  };
+
+  const handleDeleteFeeRecord = async (feeId) => {
+    if (!confirm('Kya aap is fee transaction entry ko delete karna chahte hain?')) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/fee-payments/${feeId}/`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setMessage('🗑️ Fee transaction record deleted!');
+        fetchStudents();
+      }
+    } catch (err) {
+      alert('Delete failed.');
     }
   };
 
@@ -356,7 +397,6 @@ export default function AdminDashboard() {
     );
   }
 
-  // Filtered marks: Search bar text hone par hi match hone waali entries show hongi
   const allMarks = students.flatMap(student => 
     (student.subjects || []).map(mark => ({ ...mark, studentObj: student }))
   );
@@ -368,7 +408,20 @@ export default function AdminDashboard() {
         const name = (item.studentObj.name || '').toLowerCase();
         return roll.includes(query) || name.includes(query);
       })
-    : []; // Search na hone par array empty rahega
+    : [];
+
+  const allFees = students.flatMap(student => 
+    (student.fee_history || []).map(fee => ({ ...fee, studentObj: student }))
+  );
+
+  const filteredFees = feeSearchQuery.trim()
+    ? allFees.filter(item => {
+        const query = feeSearchQuery.toLowerCase().trim();
+        const roll = (item.studentObj.roll_number || '').toLowerCase();
+        const name = (item.studentObj.name || '').toLowerCase();
+        return roll.includes(query) || name.includes(query);
+      })
+    : [];
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-gray-800">
@@ -376,7 +429,6 @@ export default function AdminDashboard() {
 
       <div className="max-w-6xl mx-auto px-4 py-10 w-full space-y-12 flex-grow">
         
-        {/* Banner with Logout */}
         <div className="bg-[#011F4B] text-white p-6 sm:p-8 rounded-3xl shadow-lg flex flex-wrap justify-between items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold">⚙️ GD Dream Career - Master Admin Control</h1>
@@ -396,7 +448,6 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* SECTION 1: Register or Edit Student */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-bold text-[#011F4B]">
@@ -438,7 +489,7 @@ export default function AdminDashboard() {
               <input type="file" accept="image/*" onChange={(e)=>setPhotoFile(e.target.files[0])} className="w-full p-2 border rounded-xl bg-slate-50 text-xs text-gray-500" />
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase mb-1">Total Fee (₹)</label>
+              <label className="block text-xs font-bold uppercase mb-1">Monthly Expected Fee (₹)</label>
               <input type="number" value={studentForm.total_fee} onChange={(e)=>setStudentForm({...studentForm, total_fee:e.target.value})} className="w-full p-3 border rounded-xl bg-slate-50 text-sm" />
             </div>
             <div>
@@ -461,12 +512,20 @@ export default function AdminDashboard() {
           </form>
         </div>
 
-        {/* SECTION 2: Add Fee & Subject Marks Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
-          {/* Fee Payment Form */}
           <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-md">
-            <h2 className="text-lg font-bold text-[#011F4B] mb-4">💰 2. Add Monthly Fee Payment</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-[#011F4B]">
+                {editingFeeId ? '✏️ Edit Fee Payment Entry' : '💰 2. Add Monthly Fee Payment'}
+              </h2>
+              {editingFeeId && (
+                <button onClick={handleCancelFeeEdit} className="text-xs bg-gray-200 px-2.5 py-1 rounded font-bold">
+                  Cancel
+                </button>
+              )}
+            </div>
+
             <form onSubmit={handleFeeSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold uppercase mb-1">Select Student *</label>
@@ -476,7 +535,7 @@ export default function AdminDashboard() {
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input type="text" required placeholder="Month (e.g. Jan 2026)" value={feeForm.month_name} onChange={(e)=>setFeeForm({...feeForm, month_name:e.target.value})} className="p-3 border rounded-xl bg-slate-50 text-sm" />
+                <input type="text" required placeholder="Fee Month (e.g. October 2026)" value={feeForm.month_name} onChange={(e)=>setFeeForm({...feeForm, month_name:e.target.value})} className="p-3 border rounded-xl bg-slate-50 text-sm" />
                 <input type="number" required placeholder="Amount Paid (₹)" value={feeForm.amount_paid} onChange={(e)=>setFeeForm({...feeForm, amount_paid:e.target.value})} className="p-3 border rounded-xl bg-slate-50 text-sm" />
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -487,13 +546,12 @@ export default function AdminDashboard() {
                   <option value="Online">Online Bank</option>
                 </select>
               </div>
-              <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition shadow">
-                Record Fee Payment
+              <button type="submit" className={`w-full text-white font-bold py-3 rounded-xl transition shadow ${editingFeeId ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
+                {editingFeeId ? 'Update Fee Record' : 'Record Fee Payment'}
               </button>
             </form>
           </div>
 
-          {/* Subject Marks & Test Copy Form */}
           <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold text-[#011F4B]">
@@ -552,12 +610,80 @@ export default function AdminDashboard() {
 
         </div>
 
-        {/* SECTION 3: Subject Marks & Test Copies Management Control Table with Search */}
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md space-y-4">
+          <div className="flex flex-wrap justify-between items-center gap-4">
+            <h2 className="text-lg font-bold text-[#011F4B]">💳 Fee Payments Management & Edit Control</h2>
+            
+            <div className="w-full sm:w-80">
+              <input
+                type="text"
+                placeholder="🔍 Type Roll No to view fee transactions..."
+                value={feeSearchQuery}
+                onChange={(e) => setFeeSearchQuery(e.target.value)}
+                className="w-full p-3 border border-emerald-300 rounded-xl bg-emerald-50 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#011F4B]"
+              />
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b text-xs uppercase text-gray-600">
+                  <th className="py-3 px-4">Student</th>
+                  <th className="py-3 px-4">Fee Month</th>
+                  <th className="py-3 px-4">Amount Paid</th>
+                  <th className="py-3 px-4">Date</th>
+                  <th className="py-3 px-4">Mode</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {!feeSearchQuery.trim() ? (
+                  <tr>
+                    <td colSpan="6" className="py-8 text-center text-xs text-gray-400 font-medium">
+                      🔍 Fee entries manage karne ke liye upar search box me <span className="font-bold text-[#011F4B]">Student Roll Number</span> type karein.
+                    </td>
+                  </tr>
+                ) : filteredFees.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="py-8 text-center text-xs text-red-400 font-bold">
+                      ❌ Roll Number "{feeSearchQuery}" ke liye koi fee records nahi mile.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredFees.map(fee => (
+                    <tr key={fee.id} className="hover:bg-slate-50">
+                      <td className="py-3 px-4 font-bold">{fee.studentObj.name} ({fee.studentObj.roll_number})</td>
+                      <td className="py-3 px-4 font-semibold">{fee.month_name}</td>
+                      <td className="py-3 px-4 font-bold text-emerald-600">₹{fee.amount_paid}</td>
+                      <td className="py-3 px-4 text-gray-600">{fee.payment_date}</td>
+                      <td className="py-3 px-4"><span className="bg-sky-100 text-[#011F4B] px-2 py-0.5 rounded text-xs font-bold">{fee.payment_mode}</span></td>
+                      <td className="py-3 px-4 text-right space-x-2">
+                        <button
+                          onClick={() => handleEditFeeClick(fee)}
+                          className="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
+                        >
+                          ✏️ Edit Fee
+                        </button>
+                        <button
+                          onClick={() => handleDeleteFeeRecord(fee.id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
+                        >
+                          ❌ Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md space-y-4">
           <div className="flex flex-wrap justify-between items-center gap-4">
             <h2 className="text-lg font-bold text-[#011F4B]">📑 Test Copies & Subject Marks Management</h2>
             
-            {/* Search Filter by Roll Number or Name */}
             <div className="w-full sm:w-80">
               <input
                 type="text"
@@ -643,7 +769,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* SECTION 4: Registered Students Directory */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md">
           <h2 className="text-lg font-bold text-[#011F4B] mb-4">📋 Registered Students Directory ({students.length})</h2>
 
