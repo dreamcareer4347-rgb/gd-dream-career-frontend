@@ -207,14 +207,19 @@ export default function AdminDashboard() {
     }
   };
 
+  // Multiple Test Copy Photos Submit Handler
   const handleMarkSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
     for (const key in markForm) {
       data.append(key, markForm[key]);
     }
-    if (testCopyFile) {
-      data.append('test_copy', testCopyFile);
+    
+    // Multiple files loop append
+    if (testCopyFile && testCopyFile.length > 0) {
+      for (let i = 0; i < testCopyFile.length; i++) {
+        data.append('test_copy', testCopyFile[i]);
+      }
     }
 
     try {
@@ -223,7 +228,7 @@ export default function AdminDashboard() {
         body: data,
       });
       if (res.ok) {
-        setMessage('📊 Subject marks and test copy uploaded successfully!');
+        setMessage('📊 Subject marks and combined test copies uploaded successfully!');
         setMarkForm({ student: '', subject_name: '', max_marks: 100, obtained_marks: '', status: 'Pass' });
         setTestCopyFile(null);
         fetchStudents();
@@ -271,7 +276,7 @@ export default function AdminDashboard() {
                 <input
                   type="text"
                   required
-                  placeholder="Enter Username (e.g. dev_admin)"
+                  placeholder="Enter Username (e.g. gd)"
                   value={adminUser}
                   onChange={(e) => setAdminUser(e.target.value)}
                   className="w-full p-3.5 border border-gray-300 rounded-xl bg-slate-50 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#011F4B]"
@@ -468,9 +473,17 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase mb-1">Test Copy File / PDF Upload</label>
-                <input type="file" accept=".pdf,image/*" onChange={(e)=>setTestCopyFile(e.target.files[0])} className="w-full p-2 border rounded-xl bg-slate-50 text-xs text-gray-500" />
+                <label className="block text-xs font-bold uppercase mb-1">Test Copy Photos / PDFs (Multiple Select)</label>
+                <input 
+                  type="file" 
+                  accept=".pdf,image/*" 
+                  multiple 
+                  onChange={(e)=>setTestCopyFile(e.target.files)} 
+                  className="w-full p-2 border rounded-xl bg-slate-50 text-xs text-gray-500" 
+                />
+                <p className="text-[10px] text-gray-400 mt-1">Aap ek sath 2-3 photos select kar sakte hain, sabhi automatic PDF me jud jayengi.</p>
               </div>
+
               <button type="submit" className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 rounded-xl transition shadow">
                 Upload Marks & Test Copy
               </button>
