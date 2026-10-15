@@ -4,7 +4,7 @@
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // Get backend URL from environment variables or fallback to live Render URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://gd-dream-career-backend.onrender.com';
@@ -13,11 +13,38 @@ export default function StudentPerformance() {
   const [rollNumber, setRollNumber] = useState('');
   const [resultPin, setResultPin] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState('Fetching student data...');
   const [studentData, setStudentData] = useState(null);
   const [error, setError] = useState('');
   
   // State for selected receipt preview
   const [selectedReceipt, setSelectedReceipt] = useState(null);
+
+  // Render cold-start UX ke liye dynamic loading text messages
+  useEffect(() => {
+    let timer1, timer2, timer3;
+    if (loading) {
+      setLoadingText('🔒 Verifying Roll Number & PIN...');
+      
+      timer1 = setTimeout(() => {
+        setLoadingText('⚡ Waking up secure cloud server (Takes ~10-20 sec)...');
+      }, 3000);
+
+      timer2 = setTimeout(() => {
+        setLoadingText('📊 Processing performance graph & marksheet...');
+      }, 10000);
+
+      timer3 = setTimeout(() => {
+        setLoadingText('✨ Almost ready! Loading details...');
+      }, 18000);
+    }
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+    };
+  }, [loading]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -129,14 +156,40 @@ export default function StudentPerformance() {
               disabled={loading}
               className="w-full bg-[#011F4B] hover:bg-black text-white font-bold py-3.5 rounded-xl transition shadow text-sm"
             >
-              {loading ? 'Fetching Dashboard...' : 'View Student Dashboard'}
+              {loading ? 'Searching...' : 'View Student Dashboard'}
             </button>
           </form>
         </div>
       </section>
 
-      {/* Result Display Section */}
-      {studentData && (
+      {/* EYE-CATCHING LOADING ANIMATION SCREEN */}
+      {loading && (
+        <section className="pb-16 max-w-md mx-auto px-4 w-full print:hidden">
+          <div className="bg-white p-8 sm:p-12 rounded-3xl border border-sky-100 shadow-xl text-center space-y-6 animate-pulse">
+            <div className="relative flex items-center justify-center w-24 h-24 mx-auto">
+              {/* Outer pulsing ring */}
+              <div className="absolute w-full h-full rounded-full border-4 border-sky-200 animate-ping opacity-75"></div>
+              {/* Spinning gradient ring */}
+              <div className="w-20 h-20 border-4 border-t-sky-600 border-sky-100 rounded-full animate-spin"></div>
+              {/* Inner Icon */}
+              <div className="absolute text-2xl">🎓</div>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-base font-extrabold text-[#011F4B]">{loadingText}</h3>
+              <p className="text-[11px] text-gray-400 font-medium">Server ko wake up hone me thoda time lag raha hai, kripya wait karein...</p>
+            </div>
+
+            {/* Glowing progress bar */}
+            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div className="bg-gradient-to-r from-sky-400 to-[#011F4B] h-full rounded-full animate-pulse w-full"></div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Result Display Section (Animation automatic gayab ho jayega jab data aayega) */}
+      {!loading && studentData && (
         <section className="pb-16 max-w-4xl mx-auto px-4 w-full print:p-0 print:max-w-none">
           <div className="bg-white rounded-3xl border border-sky-200 shadow-xl overflow-hidden print:border-none print:shadow-none">
             
