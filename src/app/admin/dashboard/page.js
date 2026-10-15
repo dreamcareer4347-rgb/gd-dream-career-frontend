@@ -356,6 +356,20 @@ export default function AdminDashboard() {
     );
   }
 
+  // Filtered marks: Search bar text hone par hi match hone waali entries show hongi
+  const allMarks = students.flatMap(student => 
+    (student.subjects || []).map(mark => ({ ...mark, studentObj: student }))
+  );
+
+  const filteredMarks = markSearchQuery.trim()
+    ? allMarks.filter(item => {
+        const query = markSearchQuery.toLowerCase().trim();
+        const roll = (item.studentObj.roll_number || '').toLowerCase();
+        const name = (item.studentObj.name || '').toLowerCase();
+        return roll.includes(query) || name.includes(query);
+      })
+    : []; // Search na hone par array empty rahega
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-gray-800">
       <Navbar />
@@ -544,13 +558,13 @@ export default function AdminDashboard() {
             <h2 className="text-lg font-bold text-[#011F4B]">📑 Test Copies & Subject Marks Management</h2>
             
             {/* Search Filter by Roll Number or Name */}
-            <div className="w-full sm:w-72">
+            <div className="w-full sm:w-80">
               <input
                 type="text"
-                placeholder="🔍 Search by Roll No or Name..."
+                placeholder="🔍 Type Roll No to view student records..."
                 value={markSearchQuery}
                 onChange={(e) => setMarkSearchQuery(e.target.value)}
-                className="w-full p-2.5 border border-gray-300 rounded-xl bg-slate-50 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#011F4B]"
+                className="w-full p-3 border border-sky-300 rounded-xl bg-sky-50 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#011F4B]"
               />
             </div>
           </div>
@@ -567,79 +581,63 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {students
-                  .flatMap(student => 
-                    (student.subjects || []).map(mark => ({ ...mark, studentObj: student }))
-                  )
-                  .filter(item => {
-                    if (!markSearchQuery.trim()) return true;
-                    const query = markSearchQuery.toLowerCase();
-                    const roll = (item.studentObj.roll_number || '').toLowerCase();
-                    const name = (item.studentObj.name || '').toLowerCase();
-                    return roll.includes(query) || name.includes(query);
-                  })
-                  .length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="py-6 text-center text-xs text-gray-400 italic">
-                        {markSearchQuery ? 'Koi matching test copy entries nahi mili.' : 'Koi test copy records uploded nahi hain.'}
+                {!markSearchQuery.trim() ? (
+                  <tr>
+                    <td colSpan="5" className="py-8 text-center text-xs text-gray-400 font-medium">
+                      🔍 Entries show karne ke liye upar search box me <span className="font-bold text-[#011F4B]">Student Roll Number</span> type karein.
+                    </td>
+                  </tr>
+                ) : filteredMarks.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="py-8 text-center text-xs text-red-400 font-bold">
+                      ❌ Roll Number "{markSearchQuery}" ke liye koi record nahi mila.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredMarks.map(mark => (
+                    <tr key={mark.id} className="hover:bg-slate-50">
+                      <td className="py-3 px-4 font-bold">{mark.studentObj.name} ({mark.studentObj.roll_number})</td>
+                      <td className="py-3 px-4">{mark.subject_name}</td>
+                      <td className="py-3 px-4 font-semibold">{mark.obtained_marks} / {mark.max_marks}</td>
+                      <td className="py-3 px-4">
+                        {mark.test_copy ? (
+                          <a 
+                            href={`${API_BASE_URL}${mark.test_copy}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-xs font-bold text-sky-600 hover:underline bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200"
+                          >
+                            📄 View PDF ({mark.test_copy_name || 'File'})
+                          </a>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">No Copy Uploaded</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right space-x-2">
+                        <button
+                          onClick={() => handleEditMarkClick(mark)}
+                          className="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
+                        >
+                          ✏️ Edit / Replace
+                        </button>
+                        {mark.test_copy && (
+                          <button
+                            onClick={() => handleDeleteTestCopy(mark.id)}
+                            className="bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
+                          >
+                            🗑️ File Delete
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteMarkRecord(mark.id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
+                        >
+                          ❌ Delete Mark
+                        </button>
                       </td>
                     </tr>
-                  ) : (
-                    students
-                      .flatMap(student => 
-                        (student.subjects || []).map(mark => ({ ...mark, studentObj: student }))
-                      )
-                      .filter(item => {
-                        if (!markSearchQuery.trim()) return true;
-                        const query = markSearchQuery.toLowerCase();
-                        const roll = (item.studentObj.roll_number || '').toLowerCase();
-                        const name = (item.studentObj.name || '').toLowerCase();
-                        return roll.includes(query) || name.includes(query);
-                      })
-                      .map(mark => (
-                        <tr key={mark.id} className="hover:bg-slate-50">
-                          <td className="py-3 px-4 font-bold">{mark.studentObj.name} ({mark.studentObj.roll_number})</td>
-                          <td className="py-3 px-4">{mark.subject_name}</td>
-                          <td className="py-3 px-4 font-semibold">{mark.obtained_marks} / {mark.max_marks}</td>
-                          <td className="py-3 px-4">
-                            {mark.test_copy ? (
-                              <a 
-                                href={`${API_BASE_URL}${mark.test_copy}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center text-xs font-bold text-sky-600 hover:underline bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200"
-                              >
-                                📄 View PDF ({mark.test_copy_name || 'File'})
-                              </a>
-                            ) : (
-                              <span className="text-xs text-gray-400 italic">No Copy Uploaded</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-right space-x-2">
-                            <button
-                              onClick={() => handleEditMarkClick(mark)}
-                              className="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
-                            >
-                              ✏️ Edit / Replace
-                            </button>
-                            {mark.test_copy && (
-                              <button
-                                onClick={() => handleDeleteTestCopy(mark.id)}
-                                className="bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
-                              >
-                                🗑️ File Delete
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleDeleteMarkRecord(mark.id)}
-                              className="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
-                            >
-                              ❌ Delete Mark
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                  )}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
