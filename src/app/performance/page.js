@@ -105,9 +105,9 @@ export default function StudentPerformance() {
 
   // --- Dynamic Current Month Fee Calculation ---
   const today = new Date();
-  const currentMonthName = today.toLocaleString('default', { month: 'long' }); // e.g., "October"
+  const currentMonthName = today.toLocaleString('default', { month: 'long' });
   const currentYear = today.getFullYear();
-  const displayCurrentMonth = `${currentMonthName} ${currentYear}`; // e.g., "October 2026"
+  const displayCurrentMonth = `${currentMonthName} ${currentYear}`;
 
   const monthlyFeeAmount = Number(studentData?.total_fee || 1000);
 
@@ -419,31 +419,36 @@ export default function StudentPerformance() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 bg-white">
-                        {studentData.subjects.map((sub, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50 transition">
-                            <td className="py-3 px-4 font-semibold text-gray-800">{sub.subject_name}</td>
-                            <td className="py-3 px-4 text-gray-500">{sub.max_marks}</td>
-                            <td className="py-3 px-4 font-black text-[#011F4B] text-base">{sub.obtained_marks}</td>
-                            <td className="py-3 px-4">
-                              {sub.test_copy ? (
-                                <a
-                                  href={
-                                    sub.test_copy.startsWith('http')
-                                      ? sub.test_copy
-                                      : `${API_BASE_URL}${sub.test_copy}`
-                                  }
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 bg-[#011F4B] hover:bg-sky-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow-sm"
-                                >
-                                  <span>📥</span> View / Download
-                                </a>
-                              ) : (
-                                <span className="text-gray-400 text-xs italic">Not Uploaded</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
+                        {studentData.subjects.map((sub, idx) => {
+                          // Clean URL formatting for Cloudinary or Local storage
+                          const copyUrl = sub.test_copy
+                            ? (sub.test_copy.startsWith('http')
+                                ? sub.test_copy
+                                : `${API_BASE_URL}${sub.test_copy.startsWith('/') ? '' : '/'}${sub.test_copy}`)
+                            : null;
+
+                          return (
+                            <tr key={idx} className="hover:bg-slate-50 transition">
+                              <td className="py-3 px-4 font-semibold text-gray-800">{sub.subject_name}</td>
+                              <td className="py-3 px-4 text-gray-500">{sub.max_marks}</td>
+                              <td className="py-3 px-4 font-black text-[#011F4B] text-base">{sub.obtained_marks}</td>
+                              <td className="py-3 px-4">
+                                {copyUrl ? (
+                                  <a
+                                    href={copyUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 bg-[#011F4B] hover:bg-sky-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow-sm"
+                                  >
+                                    <span>📥</span> View / Download
+                                  </a>
+                                ) : (
+                                  <span className="text-gray-400 text-xs italic">Not Uploaded</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
