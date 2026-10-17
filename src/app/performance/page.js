@@ -425,6 +425,7 @@ export default function StudentPerformance() {
                       </thead>
                       <tbody className="divide-y divide-gray-100 bg-white">
                         {studentData.subjects.map((sub, idx) => {
+                          // Robust URL checker for Cloudinary and local storage
                           const copyUrl = sub.test_copy
                             ? (sub.test_copy.startsWith('http')
                                 ? sub.test_copy
