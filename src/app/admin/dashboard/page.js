@@ -268,10 +268,9 @@ export default function AdminDashboard() {
       data.append(key, markForm[key]);
     }
     
-    if (testCopyFile && testCopyFile.length > 0) {
-      for (let i = 0; i < testCopyFile.length; i++) {
-        data.append('test_copy', testCopyFile[i]);
-      }
+    // Single file support for robust Cloudinary and Django storage
+    if (testCopyFile) {
+      data.append('test_copy', testCopyFile);
     }
 
     try {
@@ -625,12 +624,11 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase mb-1">Test Copy Photos / PDFs {editingMarkId ? '(Select to replace current file)' : '(Multiple Select)'}</label>
+                <label className="block text-xs font-bold uppercase mb-1">Test Copy Photo / PDF {editingMarkId ? '(Select to replace current file)' : ''}</label>
                 <input 
                   type="file" 
                   accept=".pdf,image/*" 
-                  multiple 
-                  onChange={(e)=>setTestCopyFile(e.target.files)} 
+                  onChange={(e)=>setTestCopyFile(e.target.files[0])} 
                   className="w-full p-2 border rounded-xl bg-slate-50 text-xs text-gray-500" 
                 />
               </div>
