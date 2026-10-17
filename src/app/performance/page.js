@@ -58,7 +58,9 @@ export default function StudentPerformance() {
     const cachedData = sessionStorage.getItem(cacheKey);
     if (cachedData) {
       try {
-        setStudentData(JSON.parse(cachedData));
+        const parsed = JSON.parse(cachedData);
+        console.log("CACHE CHECK - Subjects Data:", parsed.subjects);
+        setStudentData(parsed);
         return;
       } catch (err) {
         sessionStorage.removeItem(cacheKey);
@@ -83,6 +85,9 @@ export default function StudentPerformance() {
       const data = await response.json();
 
       if (response.ok && data.success) {
+        // --- DEBUG LOG: Check backend subjects & test_copy URLs ---
+        console.log("LIVE API CHECK - Subjects Data:", data.data.subjects);
+        
         setStudentData(data.data);
         // Save to sessionStorage cache to preserve Render / Neon free tier limits
         sessionStorage.setItem(cacheKey, JSON.stringify(data.data));
@@ -420,7 +425,6 @@ export default function StudentPerformance() {
                       </thead>
                       <tbody className="divide-y divide-gray-100 bg-white">
                         {studentData.subjects.map((sub, idx) => {
-                          // Clean URL formatting for Cloudinary or Local storage
                           const copyUrl = sub.test_copy
                             ? (sub.test_copy.startsWith('http')
                                 ? sub.test_copy
