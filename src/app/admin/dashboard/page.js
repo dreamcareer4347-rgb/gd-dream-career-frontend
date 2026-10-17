@@ -710,33 +710,42 @@ export default function AdminDashboard() {
                 {!markSearchQuery.trim() ? (
                   <tr>
                     <td colSpan="5" className="py-8 text-center text-xs text-gray-400 font-medium">
-                      🔍 Entries show karne ke liye upar search box me <span className="font-bold text-[#011F4B]">Student Roll Number</span> type karein.
+                      🔍 Test copies aur marks manage karne ke liye upar search box me <span className="font-bold text-[#011F4B]">Student Roll Number</span> type karein.
                     </td>
                   </tr>
                 ) : filteredMarks.length === 0 ? (
                   <tr>
                     <td colSpan="5" className="py-8 text-center text-xs text-red-400 font-bold">
-                      ❌ Roll Number "{markSearchQuery}" ke liye koi record nahi mila.
+                      ❌ Roll Number "{markSearchQuery}" ke liye koi subject marks nahi mile.
                     </td>
                   </tr>
                 ) : (
                   filteredMarks.map(mark => (
                     <tr key={mark.id} className="hover:bg-slate-50">
                       <td className="py-3 px-4 font-bold">{mark.studentObj.name} ({mark.studentObj.roll_number})</td>
-                      <td className="py-3 px-4">{mark.subject_name}</td>
-                      <td className="py-3 px-4 font-semibold">{mark.obtained_marks} / {mark.max_marks}</td>
+                      <td className="py-3 px-4 font-semibold text-[#011F4B]">{mark.subject_name}</td>
+                      <td className="py-3 px-4 font-bold">{mark.obtained_marks} / {mark.max_marks}</td>
                       <td className="py-3 px-4">
                         {mark.test_copy ? (
-                          <a 
-                            href={`${API_BASE_URL}${mark.test_copy}`} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center text-xs font-bold text-sky-600 hover:underline bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200"
-                          >
-                            📄 View PDF ({mark.test_copy_name || 'File'})
-                          </a>
+                          <div className="flex items-center gap-2">
+                            <a 
+                              href={mark.test_copy} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-xs bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-3 py-1 rounded-lg transition"
+                            >
+                              📄 View PDF/Copy
+                            </a>
+                            <button
+                              onClick={() => handleDeleteTestCopy(mark.id)}
+                              className="text-xs text-red-500 hover:underline font-semibold"
+                              title="Delete file"
+                            >
+                              ❌ Remove File
+                            </button>
+                          </div>
                         ) : (
-                          <span className="text-xs text-gray-400 italic">No Copy Uploaded</span>
+                          <span className="text-xs text-gray-400 font-medium">No Copy Uploaded</span>
                         )}
                       </td>
                       <td className="py-3 px-4 text-right space-x-2">
@@ -744,21 +753,13 @@ export default function AdminDashboard() {
                           onClick={() => handleEditMarkClick(mark)}
                           className="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
                         >
-                          ✏️ Edit / Replace
+                          ✏️ Edit
                         </button>
-                        {mark.test_copy && (
-                          <button
-                            onClick={() => handleDeleteTestCopy(mark.id)}
-                            className="bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
-                          >
-                            🗑️ File Delete
-                          </button>
-                        )}
                         <button
                           onClick={() => handleDeleteMarkRecord(mark.id)}
                           className="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
                         >
-                          ❌ Delete Mark
+                          🗑️ Delete
                         </button>
                       </td>
                     </tr>
@@ -769,64 +770,58 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md">
-          <h2 className="text-lg font-bold text-[#011F4B] mb-4">📋 Registered Students Directory ({students.length})</h2>
-
-          {loading ? (
-            <p className="text-sm text-gray-500">Loading...</p>
-          ) : students.length === 0 ? (
-            <p className="text-sm text-gray-500 italic">No students registered yet.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 border-b text-xs uppercase text-gray-600">
-                    <th className="py-3 px-4">Photo</th>
-                    <th className="py-3 px-4">Roll No</th>
-                    <th className="py-3 px-4">Name</th>
-                    <th className="py-3 px-4">Class</th>
-                    <th className="py-3 px-4">Fee Paid / Total</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md space-y-4">
+          <h2 className="text-lg font-bold text-[#011F4B]">👥 Registered Students Database List</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b text-xs uppercase text-gray-600">
+                  <th className="py-3 px-4">Photo</th>
+                  <th className="py-3 px-4">Student Name</th>
+                  <th className="py-3 px-4">Roll Number</th>
+                  <th className="py-3 px-4">Class</th>
+                  <th className="py-3 px-4">Fee Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {students.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="py-8 text-center text-xs text-gray-400">No students registered yet.</td>
                   </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {students.map((student) => (
-                    <tr key={student.id} className="hover:bg-slate-50">
+                ) : (
+                  students.map(s => (
+                    <tr key={s.id} className="hover:bg-slate-50">
                       <td className="py-3 px-4">
-                        {student.student_photo ? (
-                          <img src={student.student_photo} alt={student.name} className="w-10 h-10 rounded-full object-cover border" />
+                        {s.student_photo ? (
+                          <img src={s.student_photo} alt={s.name} className="w-10 h-10 rounded-full object-cover border" />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-gray-500">N/A</div>
+                          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-gray-600">
+                            {s.name.charAt(0)}
+                          </div>
                         )}
                       </td>
-                      <td className="py-3 px-4 font-bold">{student.roll_number}</td>
-                      <td className="py-3 px-4">{student.name}</td>
-                      <td className="py-3 px-4">{student.student_class}</td>
-                      <td className="py-3 px-4">₹{student.paid_fee} / ₹{student.total_fee}</td>
+                      <td className="py-3 px-4 font-bold">{s.name}</td>
+                      <td className="py-3 px-4 font-semibold text-[#011F4B]">{s.roll_number}</td>
+                      <td className="py-3 px-4">{s.student_class}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${s.fee_status === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                          {s.fee_status || 'Due Pending'}
+                        </span>
+                      </td>
                       <td className="py-3 px-4 text-right space-x-2">
-                        <button
-                          onClick={() => handleEditClick(student)}
-                          className="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm"
-                        >
-                          Edit Profile
-                        </button>
-                        <button
-                          onClick={() => handleDelete(student.id)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow-sm"
-                        >
-                          Delete Student
-                        </button>
+                        <button onClick={() => handleEditClick(s)} className="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold">✏️ Edit</button>
+                        <button onClick={() => handleDelete(s.id)} className="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold">🗑️ Delete</button>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
       </div>
-
       <Footer />
     </div>
   );
