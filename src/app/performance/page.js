@@ -48,8 +48,24 @@ export default function StudentPerformance() {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    
+    const trimmedRoll = rollNumber.trim();
+    const trimmedPin = resultPin.trim();
+    const cacheKey = `student_perf_${trimmedRoll}_${trimmedPin}`;
+
+    // --- Caching Check: Instant Load without hitting server if cached ---
+    const cachedData = sessionStorage.getItem(cacheKey);
+    if (cachedData) {
+      try {
+        setStudentData(JSON.parse(cachedData));
+        return;
+      } catch (err) {
+        sessionStorage.removeItem(cacheKey);
+      }
+    }
+
+    setLoading(true);
     setStudentData(null);
 
     try {
@@ -59,8 +75,8 @@ export default function StudentPerformance() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          roll_number: rollNumber.trim(),
-          result_pin: resultPin.trim(),
+          roll_number: trimmedRoll,
+          result_pin: trimmedPin,
         }),
       });
 
@@ -68,6 +84,8 @@ export default function StudentPerformance() {
 
       if (response.ok && data.success) {
         setStudentData(data.data);
+        // Save to sessionStorage cache to preserve Render / Neon free tier limits
+        sessionStorage.setItem(cacheKey, JSON.stringify(data.data));
       } else {
         setError(data.message || 'Galat Roll Number ya Result PIN! Kripya sahi detail dalein.');
       }
@@ -177,11 +195,8 @@ export default function StudentPerformance() {
         <section className="pb-16 max-w-md mx-auto px-4 w-full print:hidden">
           <div className="bg-white p-8 sm:p-12 rounded-3xl border border-sky-100 shadow-xl text-center space-y-6 animate-pulse">
             <div className="relative flex items-center justify-center w-24 h-24 mx-auto">
-              {/* Outer pulsing ring */}
               <div className="absolute w-full h-full rounded-full border-4 border-sky-200 animate-ping opacity-75"></div>
-              {/* Spinning gradient ring */}
               <div className="w-20 h-20 border-4 border-t-sky-600 border-sky-100 rounded-full animate-spin"></div>
-              {/* Inner Icon */}
               <div className="absolute text-2xl">🎓</div>
             </div>
 
@@ -190,7 +205,6 @@ export default function StudentPerformance() {
               <p className="text-[11px] text-gray-400 font-medium">Server ko wake up hone me thoda time lag raha hai, kripya wait karein...</p>
             </div>
 
-            {/* Glowing progress bar */}
             <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
               <div className="bg-gradient-to-r from-sky-400 to-[#011F4B] h-full rounded-full animate-pulse w-full"></div>
             </div>
@@ -198,7 +212,7 @@ export default function StudentPerformance() {
         </section>
       )}
 
-      {/* Result Display Section (Animation automatic gayab ho jayega jab data aayega) */}
+      {/* Result Display Section */}
       {!loading && studentData && (
         <section className="pb-16 max-w-4xl mx-auto px-4 w-full print:p-0 print:max-w-none">
           <div className="bg-white rounded-3xl border border-sky-200 shadow-xl overflow-hidden print:border-none print:shadow-none">
@@ -206,7 +220,6 @@ export default function StudentPerformance() {
             {/* Profile Header Ribbon */}
             <div className="bg-[#011F4B] p-6 sm:p-8 text-white flex flex-wrap justify-between items-center gap-6 print:bg-slate-900 print:text-black">
               <div className="flex items-center gap-5">
-                {/* Student Photo */}
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-sky-400 bg-sky-900/50 flex-shrink-0 shadow-md">
                   {studentData.student_photo ? (
                     <img
@@ -250,10 +263,9 @@ export default function StudentPerformance() {
             {/* Main Content Area */}
             <div className="p-6 sm:p-8 space-y-8">
               
-              {/* Top Summary Cards (Attendance & Dynamic Current Month Fee Status) */}
+              {/* Top Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:hidden">
                 
-                {/* Attendance Card */}
                 <div className="p-5 bg-slate-50 rounded-2xl border border-gray-200 flex items-center justify-between">
                   <div>
                     <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Overall Attendance</span>
@@ -263,7 +275,6 @@ export default function StudentPerformance() {
                   <div className="text-4xl">📅</div>
                 </div>
 
-                {/* Dynamic Current Month Fee Status Card */}
                 <div className="p-5 bg-emerald-50/60 rounded-2xl border border-emerald-100 space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-emerald-800 uppercase tracking-wide">
@@ -294,7 +305,7 @@ export default function StudentPerformance() {
 
               </div>
 
-              {/* Monthly Fee Payment History Table with Receipt Download */}
+              {/* Monthly Fee Payment History Table */}
               {studentData.fee_history && studentData.fee_history.length > 0 && (
                 <div className="pt-2">
                   <h3 className="font-bold text-[#011F4B] mb-3 text-xs uppercase tracking-wider flex items-center gap-2">
@@ -345,7 +356,6 @@ export default function StudentPerformance() {
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* English Speaking */}
                   <div className="p-5 bg-white rounded-2xl border border-sky-100 shadow-sm space-y-2 hover:border-sky-300 transition">
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-[#011F4B] text-sm">🗣️ English Speaking</span>
@@ -357,7 +367,6 @@ export default function StudentPerformance() {
                     <p className="text-xs text-gray-500">Fluency, daily speaking & vocabulary boost.</p>
                   </div>
 
-                  {/* Deep English Learning */}
                   <div className="p-5 bg-white rounded-2xl border border-sky-100 shadow-sm space-y-2 hover:border-sky-300 transition">
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-[#011F4B] text-sm">🧠 Deep English Learning</span>
@@ -369,7 +378,6 @@ export default function StudentPerformance() {
                     <p className="text-xs text-gray-500">Advanced grammar concepts & comprehension.</p>
                   </div>
 
-                  {/* Written Performance */}
                   <div className="p-5 bg-white rounded-2xl border border-sky-100 shadow-sm space-y-2 hover:border-sky-300 transition">
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-[#011F4B] text-sm">✍️ Written Performance</span>
@@ -381,7 +389,6 @@ export default function StudentPerformance() {
                     <p className="text-xs text-gray-500">Spelling, essay writing, and answer structure.</p>
                   </div>
 
-                  {/* Math Improvement */}
                   <div className="p-5 bg-white rounded-2xl border border-sky-100 shadow-sm space-y-2 hover:border-sky-300 transition">
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-[#011F4B] text-sm">📐 Math Improvement</span>
@@ -395,7 +402,7 @@ export default function StudentPerformance() {
                 </div>
               </div>
 
-              {/* Subject-Wise Test Scores Table + Test Copy Download */}
+              {/* Subject-Wise Test Scores Table */}
               {studentData.subjects && studentData.subjects.length > 0 && (
                 <div className="pt-4 border-t border-gray-100 print:hidden">
                   <h3 className="font-bold text-[#011F4B] mb-3 text-xs uppercase tracking-wider flex items-center gap-2">

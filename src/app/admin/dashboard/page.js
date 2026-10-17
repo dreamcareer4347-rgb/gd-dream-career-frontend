@@ -7,6 +7,23 @@ import Footer from '@/components/Footer';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://gd-dream-career-backend.onrender.com';
 
+// --- Custom Debounce Hook for Fast & Optimized Filtering ---
+function useDebounce(value, delay = 350) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminUser, setAdminUser] = useState('');
@@ -21,6 +38,14 @@ export default function AdminDashboard() {
   // Search filter states
   const [markSearchQuery, setMarkSearchQuery] = useState('');
   const [feeSearchQuery, setFeeSearchQuery] = useState('');
+
+  // Debounced search values (prevents browser freezing while typing)
+  const debouncedMarkQuery = useDebounce(markSearchQuery, 350);
+  const debouncedFeeQuery = useDebounce(feeSearchQuery, 350);
+
+  // Pagination state for students list table
+  const [currentStudentPage, setCurrentStudentPage] = useState(1);
+  const studentsPerPage = 5;
 
   // Track editing states
   const [editingStudentId, setEditingStudentId] = useState(null);
@@ -401,9 +426,9 @@ export default function AdminDashboard() {
     (student.subjects || []).map(mark => ({ ...mark, studentObj: student }))
   );
 
-  const filteredMarks = markSearchQuery.trim()
+  const filteredMarks = debouncedMarkQuery.trim()
     ? allMarks.filter(item => {
-        const query = markSearchQuery.toLowerCase().trim();
+        const query = debouncedMarkQuery.toLowerCase().trim();
         const roll = (item.studentObj.roll_number || '').toLowerCase();
         const name = (item.studentObj.name || '').toLowerCase();
         return roll.includes(query) || name.includes(query);
@@ -414,14 +439,20 @@ export default function AdminDashboard() {
     (student.fee_history || []).map(fee => ({ ...fee, studentObj: student }))
   );
 
-  const filteredFees = feeSearchQuery.trim()
+  const filteredFees = debouncedFeeQuery.trim()
     ? allFees.filter(item => {
-        const query = feeSearchQuery.toLowerCase().trim();
+        const query = debouncedFeeQuery.toLowerCase().trim();
         const roll = (item.studentObj.roll_number || '').toLowerCase();
         const name = (item.studentObj.name || '').toLowerCase();
         return roll.includes(query) || name.includes(query);
       })
     : [];
+
+  // Pagination slicing logic for registered students table
+  const indexOfLastStudent = currentStudentPage * studentsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+  const currentStudents = students.slice(indexOfFirstStudent, indexOfLastStudent);
+  const totalStudentPages = Math.ceil(students.length / studentsPerPage) || 1;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-gray-800">
@@ -448,6 +479,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* 1. Register Student Form */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-bold text-[#011F4B]">
@@ -512,6 +544,7 @@ export default function AdminDashboard() {
           </form>
         </div>
 
+        {/* 2. Fee & Subject Marks Forms */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-md">
@@ -610,6 +643,7 @@ export default function AdminDashboard() {
 
         </div>
 
+        {/* 3. Fee Payments Search Table */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md space-y-4">
           <div className="flex flex-wrap justify-between items-center gap-4">
             <h2 className="text-lg font-bold text-[#011F4B]">💳 Fee Payments Management & Edit Control</h2>
@@ -638,7 +672,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {!feeSearchQuery.trim() ? (
+                {!debouncedFeeQuery.trim() ? (
                   <tr>
                     <td colSpan="6" className="py-8 text-center text-xs text-gray-400 font-medium">
                       🔍 Fee entries manage karne ke liye upar search box me <span className="font-bold text-[#011F4B]">Student Roll Number</span> type karein.
@@ -647,7 +681,7 @@ export default function AdminDashboard() {
                 ) : filteredFees.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="py-8 text-center text-xs text-red-400 font-bold">
-                      ❌ Roll Number "{feeSearchQuery}" ke liye koi fee records nahi mile.
+                      ❌ Roll Number "{debouncedFeeQuery}" ke liye koi fee records nahi mile.
                     </td>
                   </tr>
                 ) : (
@@ -680,6 +714,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* 4. Subject Marks & Test Copies Table */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md space-y-4">
           <div className="flex flex-wrap justify-between items-center gap-4">
             <h2 className="text-lg font-bold text-[#011F4B]">📑 Test Copies & Subject Marks Management</h2>
@@ -707,7 +742,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {!markSearchQuery.trim() ? (
+                {!debouncedMarkQuery.trim() ? (
                   <tr>
                     <td colSpan="5" className="py-8 text-center text-xs text-gray-400 font-medium">
                       🔍 Test copies aur marks manage karne ke liye upar search box me <span className="font-bold text-[#011F4B]">Student Roll Number</span> type karein.
@@ -716,7 +751,7 @@ export default function AdminDashboard() {
                 ) : filteredMarks.length === 0 ? (
                   <tr>
                     <td colSpan="5" className="py-8 text-center text-xs text-red-400 font-bold">
-                      ❌ Roll Number "{markSearchQuery}" ke liye koi subject marks nahi mile.
+                      ❌ Roll Number "{debouncedMarkQuery}" ke liye koi subject marks nahi mile.
                     </td>
                   </tr>
                 ) : (
@@ -770,8 +805,15 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* 5. Registered Students Overview Table with Pagination */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md space-y-4">
-          <h2 className="text-lg font-bold text-[#011F4B]">👥 Registered Students Database List</h2>
+          <div className="flex flex-wrap justify-between items-center gap-4">
+            <h2 className="text-lg font-bold text-[#011F4B]">👥 Registered Students Database List</h2>
+            <span className="text-xs font-semibold bg-sky-50 text-sky-800 px-3 py-1 rounded-xl border border-sky-200">
+              Total Students: {students.length}
+            </span>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm border-collapse">
               <thead>
@@ -785,12 +827,12 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {students.length === 0 ? (
+                {currentStudents.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="py-8 text-center text-xs text-gray-400">No students registered yet.</td>
                   </tr>
                 ) : (
-                  students.map(s => (
+                  currentStudents.map(s => (
                     <tr key={s.id} className="hover:bg-slate-50">
                       <td className="py-3 px-4">
                         {s.student_photo ? (
@@ -819,6 +861,31 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {totalStudentPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <span className="text-xs text-gray-500 font-medium">
+                Page <span className="font-bold text-[#011F4B]">{currentStudentPage}</span> of <span className="font-bold text-[#011F4B]">{totalStudentPages}</span>
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentStudentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentStudentPage === 1}
+                  className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-[#011F4B] text-xs font-bold rounded-lg transition"
+                >
+                  ◀ Previous
+                </button>
+                <button
+                  onClick={() => setCurrentStudentPage(prev => Math.min(prev + 1, totalStudentPages))}
+                  disabled={currentStudentPage === totalStudentPages}
+                  className="px-3.5 py-1.5 bg-[#011F4B] hover:bg-black disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg transition"
+                >
+                  Next ▶
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
       </div>
