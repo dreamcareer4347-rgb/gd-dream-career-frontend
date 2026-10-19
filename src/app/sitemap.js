@@ -1,22 +1,23 @@
 export const metadata = {
-  title: "Best Institute Nursery to 12th, English Speaking & Free Computer | GD Dream Career",
-  description: "GD Dream Career is the 3 years trusted best institute for Nursery to 12th coaching, Spoken English, and Free Computer Education in Agra Road, Purani Chungi, Vijaypura, Jaipur. CEO Dev Sharma (Contact: 9982216542), Founders Sachin Sharma & Golu Saini.",
+  title: "Best Institute Nursery to 12th, English Speaking & Free Computer | GD Dream Career Sumel Bagrana Agra Road Jaipur",
+  description: "GD Dream Career (Sumel, Bagrana, Purani Chungi, Vijaypura, Agra Road, Jaipur - 302031) offers 3+ years of top coaching for Nursery to 12th, Spoken English, and Free Computer Education. Led by CEO Dev Sharma (9982216542), Founders Sachin Sharma & Golu Saini.",
   metadataBase: new URL("https://gddreamcareer.online"),
   alternates: {
     canonical: "/",
   },
   keywords: [
-    "coaching institute Nursery to 12th Agra Road",
-    "best English speaking institute Purani Chungi Vijaypura",
-    "free computer education institute Vijaypura",
+    "coaching institute Sumel Bagrana Jaipur",
+    "best institute Agra Road Jaipur 302031",
+    "Nursery to 12th coaching Purani Chungi Vijaypura",
+    "English speaking institute Bagrana Sumel Agra Road",
+    "free computer education near Bagrana Sumel",
     "GD Dream Career Jaipur 9982216542",
     "Dev Sharma CEO GD Dream Career",
-    "Sachin Sharma Golu Saini founders",
-    "academic coaching center Purani Chungi"
+    "Sachin Sharma Golu Saini founders GD Dream Career"
   ],
   openGraph: {
-    title: "GD Dream Career - Nursery to 12th, English Speaking & Free Computer Education",
-    description: "Best Academic & Coaching Institute in Agra Road, Purani Chungi, Vijaypura. Contact CEO Dev Sharma at 9982216542.",
+    title: "GD Dream Career - Sumel, Bagrana, Agra Road Jaipur 302031",
+    description: "Best Academic & Coaching Institute in Sumel, Bagrana, Purani Chungi, Vijaypura, Agra Road Jaipur. Contact CEO Dev Sharma at 9982216542.",
     url: "https://gddreamcareer.online",
     siteName: "GD Dream Career",
     locale: "en_IN",
