@@ -6,7 +6,6 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useState, useEffect } from 'react';
 
-// Get backend URL from environment variables or fallback to live Render URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://gd-dream-career-backend.onrender.com';
 
 export default function StudentPerformance() {
@@ -17,10 +16,8 @@ export default function StudentPerformance() {
   const [studentData, setStudentData] = useState(null);
   const [error, setError] = useState('');
   
-  // State for selected receipt preview
   const [selectedReceipt, setSelectedReceipt] = useState(null);
 
-  // Render cold-start UX ke liye dynamic loading text messages
   useEffect(() => {
     let timer1, timer2, timer3;
     if (loading) {
@@ -54,12 +51,10 @@ export default function StudentPerformance() {
     const trimmedPin = resultPin.trim();
     const cacheKey = `student_perf_${trimmedRoll}_${trimmedPin}`;
 
-    // --- Caching Check: Instant Load without hitting server if cached ---
     const cachedData = sessionStorage.getItem(cacheKey);
     if (cachedData) {
       try {
         const parsed = JSON.parse(cachedData);
-        console.log("CACHE CHECK - Subjects Data:", parsed.subjects);
         setStudentData(parsed);
         return;
       } catch (err) {
@@ -85,11 +80,7 @@ export default function StudentPerformance() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // --- DEBUG LOG: Check backend subjects & test_copy URLs ---
-        console.log("LIVE API CHECK - Subjects Data:", data.data.subjects);
-        
         setStudentData(data.data);
-        // Save to sessionStorage cache to preserve Render / Neon free tier limits
         sessionStorage.setItem(cacheKey, JSON.stringify(data.data));
       } else {
         setError(data.message || 'Galat Roll Number ya Result PIN! Kripya sahi detail dalein.');
@@ -108,7 +99,6 @@ export default function StudentPerformance() {
     }, 300);
   };
 
-  // --- Dynamic Current Month Fee Calculation ---
   const today = new Date();
   const currentMonthName = today.toLocaleString('default', { month: 'long' });
   const currentYear = today.getFullYear();
@@ -116,7 +106,6 @@ export default function StudentPerformance() {
 
   const monthlyFeeAmount = Number(studentData?.total_fee || 1000);
 
-  // Check how much paid for the current running month
   const currentMonthPaid = studentData?.fee_history
     ? studentData.fee_history
         .filter(item => (item.month_name || '').toLowerCase().includes(currentMonthName.toLowerCase()))
@@ -130,7 +119,6 @@ export default function StudentPerformance() {
     <div className="min-h-screen flex flex-col bg-slate-50 text-gray-800">
       <Navbar />
 
-      {/* Header */}
       <section className="bg-[#011F4B] text-white py-14 text-center px-4 print:hidden">
         <div className="max-w-3xl mx-auto space-y-3">
           <span className="text-sky-400 font-semibold text-xs sm:text-sm uppercase tracking-wider">
@@ -140,12 +128,11 @@ export default function StudentPerformance() {
             Academic & Skill Progress Dashboard
           </h1>
           <p className="text-gray-300 text-sm sm:text-base">
-            Apna Roll Number aur Result PIN enter karke live photo, parent details, skill metrics, test copies aur fee receipts download karein.
+            Apna Roll Number aur Result PIN enter karke live photo, parent details, skill metrics aur fee receipts download karein.
           </p>
         </div>
       </section>
 
-      {/* Search Form Section */}
       <section className="py-10 max-w-2xl mx-auto px-4 w-full print:hidden">
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md">
           <form onSubmit={handleSearch} className="space-y-4">
@@ -195,7 +182,6 @@ export default function StudentPerformance() {
         </div>
       </section>
 
-      {/* EYE-CATCHING LOADING ANIMATION SCREEN */}
       {loading && (
         <section className="pb-16 max-w-md mx-auto px-4 w-full print:hidden">
           <div className="bg-white p-8 sm:p-12 rounded-3xl border border-sky-100 shadow-xl text-center space-y-6 animate-pulse">
@@ -217,12 +203,10 @@ export default function StudentPerformance() {
         </section>
       )}
 
-      {/* Result Display Section */}
       {!loading && studentData && (
         <section className="pb-16 max-w-4xl mx-auto px-4 w-full print:p-0 print:max-w-none">
           <div className="bg-white rounded-3xl border border-sky-200 shadow-xl overflow-hidden print:border-none print:shadow-none">
             
-            {/* Profile Header Ribbon */}
             <div className="bg-[#011F4B] p-6 sm:p-8 text-white flex flex-wrap justify-between items-center gap-6 print:bg-slate-900 print:text-black">
               <div className="flex items-center gap-5">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-sky-400 bg-sky-900/50 flex-shrink-0 shadow-md">
@@ -265,10 +249,8 @@ export default function StudentPerformance() {
               </div>
             </div>
 
-            {/* Main Content Area */}
             <div className="p-6 sm:p-8 space-y-8">
               
-              {/* Top Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:hidden">
                 
                 <div className="p-5 bg-slate-50 rounded-2xl border border-gray-200 flex items-center justify-between">
@@ -310,7 +292,6 @@ export default function StudentPerformance() {
 
               </div>
 
-              {/* Monthly Fee Payment History Table */}
               {studentData.fee_history && studentData.fee_history.length > 0 && (
                 <div className="pt-2">
                   <h3 className="font-bold text-[#011F4B] mb-3 text-xs uppercase tracking-wider flex items-center gap-2">
@@ -354,7 +335,6 @@ export default function StudentPerformance() {
                 </div>
               )}
 
-              {/* 4 Skill Performance Cards */}
               <div className="print:hidden">
                 <h3 className="font-bold text-[#011F4B] mb-4 text-xs uppercase tracking-wider flex items-center gap-2">
                   <span>📊</span> Skill Improvement Breakdown
@@ -407,11 +387,11 @@ export default function StudentPerformance() {
                 </div>
               </div>
 
-              {/* Subject-Wise Test Scores Table */}
+              {/* Subject-Wise Test Scores Table (Status column & Teacher Copy removed) */}
               {studentData.subjects && studentData.subjects.length > 0 && (
                 <div className="pt-4 border-t border-gray-100 print:hidden">
                   <h3 className="font-bold text-[#011F4B] mb-3 text-xs uppercase tracking-wider flex items-center gap-2">
-                    <span>📋</span> Detailed Test Scores & Evaluated Answer Copies
+                    <span>📋</span> Detailed Test Scores
                   </h3>
                   <div className="overflow-x-auto rounded-xl border border-gray-100 shadow-sm">
                     <table className="w-full text-left text-sm border-collapse">
@@ -420,40 +400,16 @@ export default function StudentPerformance() {
                           <th className="py-3 px-4">Subject / Test Name</th>
                           <th className="py-3 px-4">Max Marks</th>
                           <th className="py-3 px-4">Obtained Marks</th>
-                          <th className="py-3 px-4">Teacher Checked Copy</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 bg-white">
-                        {studentData.subjects.map((sub, idx) => {
-                          // Robust URL checker for Cloudinary and local storage
-                          const copyUrl = sub.test_copy
-                            ? (sub.test_copy.startsWith('http')
-                                ? sub.test_copy
-                                : `${API_BASE_URL}${sub.test_copy.startsWith('/') ? '' : '/'}${sub.test_copy}`)
-                            : null;
-
-                          return (
-                            <tr key={idx} className="hover:bg-slate-50 transition">
-                              <td className="py-3 px-4 font-semibold text-gray-800">{sub.subject_name}</td>
-                              <td className="py-3 px-4 text-gray-500">{sub.max_marks}</td>
-                              <td className="py-3 px-4 font-black text-[#011F4B] text-base">{sub.obtained_marks}</td>
-                              <td className="py-3 px-4">
-                                {copyUrl ? (
-                                  <a
-                                    href={copyUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 bg-[#011F4B] hover:bg-sky-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow-sm"
-                                  >
-                                    <span>📥</span> View / Download
-                                  </a>
-                                ) : (
-                                  <span className="text-gray-400 text-xs italic">Not Uploaded</span>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
+                        {studentData.subjects.map((sub, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50 transition">
+                            <td className="py-3 px-4 font-semibold text-gray-800">{sub.subject_name}</td>
+                            <td className="py-3 px-4 text-gray-500">{sub.max_marks}</td>
+                            <td className="py-3 px-4 font-black text-[#011F4B] text-base">{sub.obtained_marks}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
@@ -465,7 +421,6 @@ export default function StudentPerformance() {
         </section>
       )}
 
-      {/* Hidden Print Receipt Modal */}
       {selectedReceipt && (
         <div className="hidden print:block fixed inset-0 bg-white z-50 p-8 text-black">
           <div className="max-w-xl mx-auto border-2 border-[#011F4B] p-8 rounded-2xl space-y-6 relative bg-white">

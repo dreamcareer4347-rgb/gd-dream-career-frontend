@@ -7,7 +7,6 @@ import Footer from '@/components/Footer';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://gd-dream-career-backend.onrender.com';
 
-// --- Custom Debounce Hook for Fast & Optimized Filtering ---
 function useDebounce(value, delay = 350) {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -35,24 +34,19 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
-  // Search filter states
   const [markSearchQuery, setMarkSearchQuery] = useState('');
   const [feeSearchQuery, setFeeSearchQuery] = useState('');
 
-  // Debounced search values (prevents browser freezing while typing)
   const debouncedMarkQuery = useDebounce(markSearchQuery, 350);
   const debouncedFeeQuery = useDebounce(feeSearchQuery, 350);
 
-  // Pagination state for students list table
   const [currentStudentPage, setCurrentStudentPage] = useState(1);
   const studentsPerPage = 5;
 
-  // Track editing states
   const [editingStudentId, setEditingStudentId] = useState(null);
   const [editingMarkId, setEditingMarkId] = useState(null);
   const [editingFeeId, setEditingFeeId] = useState(null);
 
-  // 1. Student Form State
   const [studentForm, setStudentForm] = useState({
     name: '', parents_name: '', roll_number: '', result_pin: '', student_class: '',
     attendance: '95%', grade: 'A+', total_percentage: '88%',
@@ -62,12 +56,9 @@ export default function AdminDashboard() {
   });
   const [photoFile, setPhotoFile] = useState(null);
 
-  // 2. Fee Payment Form State
   const [feeForm, setFeeForm] = useState({ student: '', month_name: '', amount_paid: '', payment_date: '', payment_mode: 'Cash', receipt_note: '' });
 
-  // 3. Subject Marks Form State
-  const [markForm, setMarkForm] = useState({ student: '', subject_name: '', max_marks: 100, obtained_marks: '', status: 'Pass' });
-  const [testCopyFile, setTestCopyFile] = useState(null);
+  const [markForm, setMarkForm] = useState({ student: '', subject_name: '', max_marks: 100, obtained_marks: '' });
 
   useEffect(() => {
     const isSavedAuth = localStorage.getItem('gd_admin_authenticated');
@@ -268,15 +259,6 @@ export default function AdminDashboard() {
 
   const handleMarkSubmit = async (e) => {
     e.preventDefault();
-    const data = new FormData();
-    for (const key in markForm) {
-      data.append(key, markForm[key]);
-    }
-    
-    if (testCopyFile) {
-      data.append('test_copy', testCopyFile);
-    }
-
     try {
       const baseUrl = API_BASE_URL.replace(/\/+$/, '');
       const url = editingMarkId 
@@ -284,15 +266,27 @@ export default function AdminDashboard() {
         : `${baseUrl}/api/subject-marks/`;
       const method = editingMarkId ? 'PATCH' : 'POST';
 
-      const res = await fetch(url, { method, body: data });
+      const res = await fetch(url, { 
+        method, 
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({
+          student: markForm.student,
+          subject_name: markForm.subject_name,
+          max_marks: Number(markForm.max_marks),
+          obtained_marks: Number(markForm.obtained_marks)
+        })
+      });
+
       if (res.ok) {
-        setMessage(editingMarkId ? '✏️ Subject mark & test copy updated!' : '📊 Subject marks & test copy uploaded!');
-        setMarkForm({ student: '', subject_name: '', max_marks: 100, obtained_marks: '', status: 'Pass' });
-        setTestCopyFile(null);
+        setMessage(editingMarkId ? '✏️ Subject mark updated!' : '📊 Subject marks added successfully!');
+        setMarkForm({ student: '', subject_name: '', max_marks: 100, obtained_marks: '' });
         setEditingMarkId(null);
         fetchStudents();
       } else {
-        setMessage('❌ Error saving marks.');
+        const errData = await res.json();
+        setMessage(`❌ Error saving marks: ${JSON.stringify(errData)}`);
       }
     } catch (err) {
       setMessage('❌ Server error.');
@@ -306,15 +300,13 @@ export default function AdminDashboard() {
       subject_name: mark.subject_name,
       max_marks: mark.max_marks,
       obtained_marks: mark.obtained_marks,
-      status: mark.status || 'Pass',
     });
     window.scrollTo({ top: 400, behavior: 'smooth' });
   };
 
   const handleCancelMarkEdit = () => {
     setEditingMarkId(null);
-    setMarkForm({ student: '', subject_name: '', max_marks: 100, obtained_marks: '', status: 'Pass' });
-    setTestCopyFile(null);
+    setMarkForm({ student: '', subject_name: '', max_marks: 100, obtained_marks: '' });
   };
 
   const handleDeleteMarkRecord = async (markId) => {
@@ -451,7 +443,7 @@ export default function AdminDashboard() {
         <div className="bg-[#011F4B] text-white p-6 sm:p-8 rounded-3xl shadow-lg flex flex-wrap justify-between items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold">⚙️ GD Dream Career - Master Admin Control</h1>
-            <p className="text-sky-200 text-sm mt-1">Manage Students, Fees, Subject Marks, Test Copies & Cloudinary Photos seamlessly.</p>
+            <p className="text-sky-200 text-sm mt-1">Manage Students, Fees, Subject Marks & Cloudinary Photos seamlessly.</p>
           </div>
           <button
             onClick={handleLogout}
@@ -576,7 +568,7 @@ export default function AdminDashboard() {
           <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold text-[#011F4B]">
-                {editingMarkId ? '✏️ Edit Subject Mark & Replace File' : '📊 3. Add Subject Marks & Test Copy'}
+                {editingMarkId ? '✏️ Edit Subject Mark' : '📊 3. Add Subject Marks'}
               </h2>
               {editingMarkId && (
                 <button onClick={handleCancelMarkEdit} className="text-xs bg-gray-200 px-2.5 py-1 rounded font-bold">
@@ -612,18 +604,8 @@ export default function AdminDashboard() {
                 <input type="number" required placeholder="Max Marks" value={markForm.max_marks} onChange={(e)=>setMarkForm({...markForm, max_marks:e.target.value})} className="p-3 border rounded-xl bg-slate-50 text-sm col-span-1" />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase mb-1">Test Copy Photo / PDF {editingMarkId ? '(Select to replace current file)' : ''}</label>
-                <input 
-                  type="file" 
-                  accept=".pdf,image/*" 
-                  onChange={(e)=>setTestCopyFile(e.target.files[0])} 
-                  className="w-full p-2 border rounded-xl bg-slate-50 text-xs text-gray-500" 
-                />
-              </div>
-
               <button type="submit" className={`w-full text-white font-bold py-3 rounded-xl transition shadow ${editingMarkId ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-sky-600 hover:bg-sky-700'}`}>
-                {editingMarkId ? 'Update Mark Record' : 'Upload Marks & Test Copy'}
+                {editingMarkId ? 'Update Mark Record' : 'Save Subject Marks'}
               </button>
             </form>
           </div>
@@ -701,10 +683,10 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* 4. Subject Marks & Test Copies Management Table */}
+        {/* 4. Subject Marks Management Table (Status column removed) */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md space-y-4">
           <div className="flex flex-wrap justify-between items-center gap-4">
-            <h2 className="text-lg font-bold text-[#011F4B]">📊 Subject Marks & Test Copies Management</h2>
+            <h2 className="text-lg font-bold text-[#011F4B]">📊 Subject Marks Management</h2>
             
             <div className="w-full sm:w-80">
               <input
@@ -724,21 +706,19 @@ export default function AdminDashboard() {
                   <th className="py-3 px-4">Student</th>
                   <th className="py-3 px-4">Subject</th>
                   <th className="py-3 px-4">Marks</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Test Copy File</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {!debouncedMarkQuery.trim() ? (
                   <tr>
-                    <td colSpan="6" className="py-8 text-center text-xs text-gray-400 font-medium">
+                    <td colSpan="4" className="py-8 text-center text-xs text-gray-400 font-medium">
                       🔍 Subject marks manage karne ke liye upar search box me <span className="font-bold text-[#011F4B]">Student Roll Number</span> type karein.
                     </td>
                   </tr>
                 ) : filteredMarks.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="py-8 text-center text-xs text-red-400 font-bold">
+                    <td colSpan="4" className="py-8 text-center text-xs text-red-400 font-bold">
                       ❌ Roll Number "{debouncedMarkQuery}" ke liye koi subject marks nahi mile.
                     </td>
                   </tr>
@@ -748,20 +728,6 @@ export default function AdminDashboard() {
                       <td className="py-3 px-4 font-bold">{mark.studentObj.name} ({mark.studentObj.roll_number})</td>
                       <td className="py-3 px-4 font-semibold">{mark.subject_name}</td>
                       <td className="py-3 px-4 font-bold">{mark.obtained_marks} / {mark.max_marks}</td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${mark.status === 'Pass' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                          {mark.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-xs font-medium">
-                        {mark.test_copy ? (
-                          <a href={mark.test_copy} target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline font-bold">
-                            📄 View File
-                          </a>
-                        ) : (
-                          <span className="text-gray-400">No File</span>
-                        )}
-                      </td>
                       <td className="py-3 px-4 text-right space-x-2">
                         <button
                           onClick={() => handleEditMarkClick(mark)}
@@ -836,7 +802,6 @@ export default function AdminDashboard() {
             </table>
           </div>
 
-          {/* Pagination Controls */}
           {totalStudentPages > 1 && (
             <div className="flex justify-center items-center gap-2 pt-4">
               <button
