@@ -83,7 +83,8 @@ export default function AdminDashboard() {
     setAuthError('');
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/admin-login/`, {
+      const baseUrl = API_BASE_URL.replace(/\/+$/, '');
+      const res = await fetch(`${baseUrl}/api/admin-login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -94,7 +95,7 @@ export default function AdminDashboard() {
 
       const data = await res.json();
 
-      if (res.ok && data.success) {
+      if (res.ok && (data.success === true || data.status === 'success' || res.status === 200)) {
         setIsAuthenticated(true);
         localStorage.setItem('gd_admin_authenticated', 'true');
         fetchStudents();
@@ -115,7 +116,8 @@ export default function AdminDashboard() {
 
   const fetchStudents = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/students/`);
+      const baseUrl = API_BASE_URL.replace(/\/+$/, '');
+      const res = await fetch(`${baseUrl}/api/students/`);
       const data = await res.json();
       setStudents(data);
     } catch (err) {
@@ -138,9 +140,10 @@ export default function AdminDashboard() {
     }
 
     try {
+      const baseUrl = API_BASE_URL.replace(/\/+$/, '');
       const url = editingStudentId 
-        ? `${API_BASE_URL}/api/students/${editingStudentId}/` 
-        : `${API_BASE_URL}/api/students/`;
+        ? `${baseUrl}/api/students/${editingStudentId}/` 
+        : `${baseUrl}/api/students/`;
       
       const method = editingStudentId ? 'PATCH' : 'POST';
 
@@ -205,9 +208,10 @@ export default function AdminDashboard() {
   const handleFeeSubmit = async (e) => {
     e.preventDefault();
     try {
+      const baseUrl = API_BASE_URL.replace(/\/+$/, '');
       const url = editingFeeId
-        ? `${API_BASE_URL}/api/fee-payments/${editingFeeId}/`
-        : `${API_BASE_URL}/api/fee-payments/`;
+        ? `${baseUrl}/api/fee-payments/${editingFeeId}/`
+        : `${baseUrl}/api/fee-payments/`;
       const method = editingFeeId ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {
@@ -249,7 +253,8 @@ export default function AdminDashboard() {
   const handleDeleteFeeRecord = async (feeId) => {
     if (!confirm('Kya aap is fee transaction entry ko delete karna chahte hain?')) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/api/fee-payments/${feeId}/`, {
+      const baseUrl = API_BASE_URL.replace(/\/+$/, '');
+      const res = await fetch(`${baseUrl}/api/fee-payments/${feeId}/`, {
         method: 'DELETE',
       });
       if (res.ok) {
@@ -268,15 +273,15 @@ export default function AdminDashboard() {
       data.append(key, markForm[key]);
     }
     
-    // Single file support for robust Cloudinary and Django storage
     if (testCopyFile) {
       data.append('test_copy', testCopyFile);
     }
 
     try {
+      const baseUrl = API_BASE_URL.replace(/\/+$/, '');
       const url = editingMarkId 
-        ? `${API_BASE_URL}/api/subject-marks/${editingMarkId}/` 
-        : `${API_BASE_URL}/api/subject-marks/`;
+        ? `${baseUrl}/api/subject-marks/${editingMarkId}/` 
+        : `${baseUrl}/api/subject-marks/`;
       const method = editingMarkId ? 'PATCH' : 'POST';
 
       const res = await fetch(url, { method, body: data });
@@ -312,27 +317,11 @@ export default function AdminDashboard() {
     setTestCopyFile(null);
   };
 
-  const handleDeleteTestCopy = async (markId) => {
-    if (!confirm('Kya aap is test copy PDF file ko delete karna chahte hain?')) return;
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/subject-marks/${markId}/delete_test_copy/`, {
-        method: 'POST',
-      });
-      if (res.ok) {
-        setMessage('🗑️ Test copy file deleted!');
-        fetchStudents();
-      } else {
-        alert('Failed to delete file.');
-      }
-    } catch (err) {
-      alert('Server error.');
-    }
-  };
-
   const handleDeleteMarkRecord = async (markId) => {
     if (!confirm('Kya aap is pure mark record ko delete karna chahte hain?')) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/api/subject-marks/${markId}/`, {
+      const baseUrl = API_BASE_URL.replace(/\/+$/, '');
+      const res = await fetch(`${baseUrl}/api/subject-marks/${markId}/`, {
         method: 'DELETE',
       });
       if (res.ok) {
@@ -347,7 +336,8 @@ export default function AdminDashboard() {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this student?')) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/api/students/${id}/`, { method: 'DELETE' });
+      const baseUrl = API_BASE_URL.replace(/\/+$/, '');
+      const res = await fetch(`${baseUrl}/api/students/${id}/`, { method: 'DELETE' });
       if (res.ok) {
         setStudents(students.filter(s => s.id !== id));
         setMessage('🗑️ Student deleted.');
@@ -447,7 +437,6 @@ export default function AdminDashboard() {
       })
     : [];
 
-  // Pagination slicing logic for registered students table
   const indexOfLastStudent = currentStudentPage * studentsPerPage;
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
   const currentStudents = students.slice(indexOfFirstStudent, indexOfLastStudent);
@@ -712,15 +701,15 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* 4. Subject Marks & Test Copies Table */}
+        {/* 4. Subject Marks & Test Copies Management Table */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md space-y-4">
           <div className="flex flex-wrap justify-between items-center gap-4">
-            <h2 className="text-lg font-bold text-[#011F4B]">📑 Test Copies & Subject Marks Management</h2>
+            <h2 className="text-lg font-bold text-[#011F4B]">📊 Subject Marks & Test Copies Management</h2>
             
             <div className="w-full sm:w-80">
               <input
                 type="text"
-                placeholder="🔍 Type Roll No to view student records..."
+                placeholder="🔍 Type Roll No to view subject marks..."
                 value={markSearchQuery}
                 onChange={(e) => setMarkSearchQuery(e.target.value)}
                 className="w-full p-3 border border-sky-300 rounded-xl bg-sky-50 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#011F4B]"
@@ -733,22 +722,23 @@ export default function AdminDashboard() {
               <thead>
                 <tr className="bg-slate-50 border-b text-xs uppercase text-gray-600">
                   <th className="py-3 px-4">Student</th>
-                  <th className="py-3 px-4">Subject / Skill</th>
+                  <th className="py-3 px-4">Subject</th>
                   <th className="py-3 px-4">Marks</th>
-                  <th className="py-3 px-4">Test Copy Status</th>
-                  <th className="py-3 px-4 text-right">Control Actions</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Test Copy File</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {!debouncedMarkQuery.trim() ? (
                   <tr>
-                    <td colSpan="5" className="py-8 text-center text-xs text-gray-400 font-medium">
-                      🔍 Test copies aur marks manage karne ke liye upar search box me <span className="font-bold text-[#011F4B]">Student Roll Number</span> type karein.
+                    <td colSpan="6" className="py-8 text-center text-xs text-gray-400 font-medium">
+                      🔍 Subject marks manage karne ke liye upar search box me <span className="font-bold text-[#011F4B]">Student Roll Number</span> type karein.
                     </td>
                   </tr>
                 ) : filteredMarks.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="py-8 text-center text-xs text-red-400 font-bold">
+                    <td colSpan="6" className="py-8 text-center text-xs text-red-400 font-bold">
                       ❌ Roll Number "{debouncedMarkQuery}" ke liye koi subject marks nahi mile.
                     </td>
                   </tr>
@@ -756,29 +746,20 @@ export default function AdminDashboard() {
                   filteredMarks.map(mark => (
                     <tr key={mark.id} className="hover:bg-slate-50">
                       <td className="py-3 px-4 font-bold">{mark.studentObj.name} ({mark.studentObj.roll_number})</td>
-                      <td className="py-3 px-4 font-semibold text-[#011F4B]">{mark.subject_name}</td>
+                      <td className="py-3 px-4 font-semibold">{mark.subject_name}</td>
                       <td className="py-3 px-4 font-bold">{mark.obtained_marks} / {mark.max_marks}</td>
                       <td className="py-3 px-4">
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${mark.status === 'Pass' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                          {mark.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-xs font-medium">
                         {mark.test_copy ? (
-                          <div className="flex items-center gap-2">
-                            <a 
-                              href={mark.test_copy} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-xs bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold px-3 py-1 rounded-lg transition"
-                            >
-                              📄 View PDF/Copy
-                            </a>
-                            <button
-                              onClick={() => handleDeleteTestCopy(mark.id)}
-                              className="text-xs text-red-500 hover:underline font-semibold"
-                              title="Delete file"
-                            >
-                              ❌ Remove File
-                            </button>
-                          </div>
+                          <a href={mark.test_copy} target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline font-bold">
+                            📄 View File
+                          </a>
                         ) : (
-                          <span className="text-xs text-gray-400 font-medium">No Copy Uploaded</span>
+                          <span className="text-gray-400">No File</span>
                         )}
                       </td>
                       <td className="py-3 px-4 text-right space-x-2">
@@ -786,10 +767,63 @@ export default function AdminDashboard() {
                           onClick={() => handleEditMarkClick(mark)}
                           className="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
                         >
-                          ✏️ Edit
+                          ✏️ Edit Marks
                         </button>
                         <button
                           onClick={() => handleDeleteMarkRecord(mark.id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
+                        >
+                          ❌ Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* 5. Registered Students Directory Table */}
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md space-y-4">
+          <h2 className="text-lg font-bold text-[#011F4B]">🎓 Registered Students Directory</h2>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b text-xs uppercase text-gray-600">
+                  <th className="py-3 px-4">Roll No</th>
+                  <th className="py-3 px-4">Name</th>
+                  <th className="py-3 px-4">Class</th>
+                  <th className="py-3 px-4">PIN</th>
+                  <th className="py-3 px-4">Fee Paid / Total</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {currentStudents.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="py-8 text-center text-xs text-gray-400 font-medium">
+                      Koi registered students nahi mile.
+                    </td>
+                  </tr>
+                ) : (
+                  currentStudents.map(student => (
+                    <tr key={student.id} className="hover:bg-slate-50">
+                      <td className="py-3 px-4 font-bold text-[#011F4B]">{student.roll_number}</td>
+                      <td className="py-3 px-4 font-semibold">{student.name}</td>
+                      <td className="py-3 px-4">{student.student_class}</td>
+                      <td className="py-3 px-4 font-mono font-bold text-gray-600">{student.result_pin}</td>
+                      <td className="py-3 px-4 font-bold text-emerald-600">₹{student.paid_fee} / ₹{student.total_fee}</td>
+                      <td className="py-3 px-4 text-right space-x-2">
+                        <button
+                          onClick={() => handleEditClick(student)}
+                          className="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(student.id)}
                           className="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow-sm"
                         >
                           🗑️ Delete
@@ -801,87 +835,27 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-        </div>
-
-        {/* 5. Registered Students Overview Table with Pagination */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-md space-y-4">
-          <div className="flex flex-wrap justify-between items-center gap-4">
-            <h2 className="text-lg font-bold text-[#011F4B]">👥 Registered Students Database List</h2>
-            <span className="text-xs font-semibold bg-sky-50 text-sky-800 px-3 py-1 rounded-xl border border-sky-200">
-              Total Students: {students.length}
-            </span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b text-xs uppercase text-gray-600">
-                  <th className="py-3 px-4">Photo</th>
-                  <th className="py-3 px-4">Student Name</th>
-                  <th className="py-3 px-4">Roll Number</th>
-                  <th className="py-3 px-4">Class</th>
-                  <th className="py-3 px-4">Fee Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {currentStudents.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="py-8 text-center text-xs text-gray-400">No students registered yet.</td>
-                  </tr>
-                ) : (
-                  currentStudents.map(s => (
-                    <tr key={s.id} className="hover:bg-slate-50">
-                      <td className="py-3 px-4">
-                        {s.student_photo ? (
-                          <img src={s.student_photo} alt={s.name} className="w-10 h-10 rounded-full object-cover border" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                            {s.name.charAt(0)}
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 font-bold">{s.name}</td>
-                      <td className="py-3 px-4 font-semibold text-[#011F4B]">{s.roll_number}</td>
-                      <td className="py-3 px-4">{s.student_class}</td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${s.fee_status === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                          {s.fee_status || 'Due Pending'}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right space-x-2">
-                        <button onClick={() => handleEditClick(s)} className="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold">✏️ Edit</button>
-                        <button onClick={() => handleDelete(s.id)} className="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold">🗑️ Delete</button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
 
           {/* Pagination Controls */}
           {totalStudentPages > 1 && (
-            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-              <span className="text-xs text-gray-500 font-medium">
-                Page <span className="font-bold text-[#011F4B]">{currentStudentPage}</span> of <span className="font-bold text-[#011F4B]">{totalStudentPages}</span>
+            <div className="flex justify-center items-center gap-2 pt-4">
+              <button
+                onClick={() => setCurrentStudentPage(p => Math.max(p - 1, 1))}
+                disabled={currentStudentPage === 1}
+                className="px-3 py-1.5 rounded-lg border bg-white text-xs font-bold disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span className="text-xs font-bold text-gray-600">
+                Page {currentStudentPage} of {totalStudentPages}
               </span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setCurrentStudentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentStudentPage === 1}
-                  className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed text-[#011F4B] text-xs font-bold rounded-lg transition"
-                >
-                  ◀ Previous
-                </button>
-                <button
-                  onClick={() => setCurrentStudentPage(prev => Math.min(prev + 1, totalStudentPages))}
-                  disabled={currentStudentPage === totalStudentPages}
-                  className="px-3.5 py-1.5 bg-[#011F4B] hover:bg-black disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg transition"
-                >
-                  Next ▶
-                </button>
-              </div>
+              <button
+                onClick={() => setCurrentStudentPage(p => Math.min(p + 1, totalStudentPages))}
+                disabled={currentStudentPage === totalStudentPages}
+                className="px-3 py-1.5 rounded-lg border bg-white text-xs font-bold disabled:opacity-40"
+              >
+                Next
+              </button>
             </div>
           )}
         </div>
