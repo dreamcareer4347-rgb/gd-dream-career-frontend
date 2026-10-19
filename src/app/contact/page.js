@@ -20,7 +20,7 @@ export default function ContactUs() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // <--- YAHAN APNA WHATSAPP NUMBER SET KAREIN (Without '+' or spaces, e.g. 919876543210) --->
+  // <--- ADMIN WHATSAPP NUMBER (CEO Dev Sharma) --->
   const ADMIN_WHATSAPP_NUMBER = "919982216542"; 
 
   const handleChange = (e) => {
@@ -51,7 +51,7 @@ export default function ContactUs() {
 
       // 2. WhatsApp message text format karna
       const waMessage = 
-        `🔔 *New Inquiry Received!*%0A%0A` +
+        `🔔 *New Inquiry - GD Dream Career*%0A%0A` +
         `👤 *Name:* ${encodeURIComponent(formData.name)}%0A` +
         `📱 *Mobile:* ${encodeURIComponent(formData.mobile)}%0A` +
         `✉️ *Email:* ${encodeURIComponent(formData.email || 'N/A')}%0A` +
@@ -68,7 +68,7 @@ export default function ContactUs() {
       console.error('Inquiry Submission Error:', err);
       // Agar backend issue bhi aaye tab bhi WhatsApp par redirect allow karna
       const waMessage = 
-        `🔔 *New Inquiry Received!*%0A%0A` +
+        `🔔 *New Inquiry - GD Dream Career*%0A%0A` +
         `👤 *Name:* ${encodeURIComponent(formData.name)}%0A` +
         `📱 *Mobile:* ${encodeURIComponent(formData.mobile)}%0A` +
         `🎓 *Class:* ${encodeURIComponent(formData.student_class)}%0A` +
@@ -91,23 +91,51 @@ export default function ContactUs() {
       <section className="bg-[#011F4B] text-white py-16 text-center px-4">
         <div className="max-w-3xl mx-auto space-y-4">
           <span className="text-sky-400 font-semibold text-xs sm:text-sm uppercase tracking-wider">
-            — GET IN TOUCH
+            — CONTACT GD DREAM CAREER INSTITUTE
           </span>
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-            Contact GD Dream Career Institute
+            Get in Touch with Agra Road Jaipur&apos;s #1 Institute
           </h1>
-          <p className="text-gray-300 text-sm sm:text-base">
-            Aapke sawalon ke jawab dene aur aapke bache ke future ko shape karne me humari team hamesha taiyar hai. Humse contact karein!
+          <p className="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            Nursery to 12th coaching, Spoken English, aur Free Computer Education ke liye Sumel, Bagrana, Purani Chungi, aur Vijaypura, Jaipur mein humse contact karein. CEO Dev Sharma: +91 9982216542.
           </p>
+        </div>
+      </section>
+
+      {/* Contact Info & Details Strip */}
+      <section className="bg-sky-50 py-8 border-b border-sky-100">
+        <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-sky-100">
+            <h3 className="font-bold text-[#011F4B] text-base mb-1">📍 Institute Location</h3>
+            <p className="text-gray-600 text-xs leading-relaxed">
+              Agra Road, Sumel, Bagrana, Purani Chungi, Vijaypura, Jaipur, Rajasthan 302031 (Plus Code: VWP7+HQ2)
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-sky-100">
+            <h3 className="font-bold text-[#011F4B] text-base mb-1">📞 Direct Call & WhatsApp</h3>
+            <p className="text-gray-600 text-xs leading-relaxed">
+              CEO Dev Sharma: <a href="tel:9982216542" className="text-sky-600 font-semibold hover:underline">+91 9982216542</a><br />
+              Founders: Sachin Sharma & Golu Saini
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-sky-100">
+            <h3 className="font-bold text-[#011F4B] text-base mb-1">🎓 Programs Offered</h3>
+            <p className="text-gray-600 text-xs leading-relaxed">
+              Nursery to 12th Coaching, Spoken English Confidence, & Free Computer Education (3 Years of Excellence)
+            </p>
+          </div>
         </div>
       </section>
 
       {/* Contact Form Section */}
       <section className="py-16 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="bg-[#F0F9FF] p-8 sm:p-12 rounded-3xl border border-sky-100 shadow-lg">
-          <h2 className="text-2xl font-bold text-[#011F4B] mb-6 text-center">
+        <div className="bg-white p-8 sm:p-12 rounded-3xl border border-gray-200 shadow-xl">
+          <h2 className="text-2xl font-bold text-[#011F4B] mb-2 text-center">
             Admission & Course Inquiry Form
           </h2>
+          <p className="text-gray-500 text-xs text-center mb-8">
+            Form submit karte hi seedha WhatsApp par CEO Dev Sharma ke paas message pahuch jayega.
+          </p>
 
           {submitted ? (
             <div className="bg-green-100 border border-green-400 text-green-700 px-6 py-6 rounded-2xl text-center space-y-3">
@@ -199,6 +227,8 @@ export default function ContactUs() {
                     <option value="Class 8">Class 8</option>
                     <option value="Class 9">Class 9</option>
                     <option value="Class 10">Class 10</option>
+                    <option value="Class 11">Class 11</option>
+                    <option value="Class 12">Class 12</option>
                   </select>
                 </div>
               </div>
@@ -213,9 +243,8 @@ export default function ContactUs() {
                     onChange={handleChange}
                     className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#011F4B] bg-white text-sm"
                   >
-                    <option value="English Speaking">English Speaking</option>
-                    <option value="Deep English Learning">Deep English Learning</option>
-                    <option value="Academic Foundation">Nursery to Class 10 Academic Foundation</option>
+                    <option value="English Speaking">Spoken English Classes</option>
+                    <option value="Nursery to 12th Academic Coaching">Nursery to 12th Academic Coaching</option>
                     <option value="Free Computer Education">Free Computer Education</option>
                   </select>
                 </div>
@@ -232,7 +261,7 @@ export default function ContactUs() {
                     <option value="Admission">Admission Inquiry</option>
                     <option value="Fee Structure">Fee Structure</option>
                     <option value="Batch Timings">Batch Timings</option>
-                    <option value="Other">Other</option>
+                    <option value="Other">Other Query</option>
                   </select>
                 </div>
               </div>
@@ -245,7 +274,7 @@ export default function ContactUs() {
                   rows="4" 
                   value={formData.message} 
                   onChange={handleChange}
-                  placeholder="Apni koi aur query yaha likhein..." 
+                  placeholder="Apni koi aur query ya requirement yaha likhein..." 
                   className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#011F4B] bg-white text-sm"
                 ></textarea>
               </div>
@@ -257,7 +286,7 @@ export default function ContactUs() {
                   disabled={loading}
                   className="bg-[#011F4B] hover:bg-black text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition duration-150 w-full sm:w-auto flex items-center justify-center gap-2 mx-auto"
                 >
-                  {loading ? 'Submitting...' : 'Submit Inquiry via WhatsApp'}
+                  {loading ? 'Submitting...' : '💬 Submit Inquiry via WhatsApp'}
                 </button>
               </div>
             </form>

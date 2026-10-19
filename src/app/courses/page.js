@@ -8,32 +8,32 @@ import Link from 'next/link';
 export default function Courses() {
   const courseList = [
     {
-      title: "English Speaking",
-      category: "Communication",
-      description: "Build confidence, improve daily conversation skills, and speak English fluently without hesitation.",
-      skills: ["Daily Vocabulary", "Pronunciation", "Fluency Practice", "Basic Grammar"],
+      title: "Spoken English & Communication",
+      category: "Communication & Personality",
+      description: "Daily English conversation, confidence building, public speaking, and accent practice to express thoughts fluently without hesitation.",
+      skills: ["Daily Vocabulary", "Pronunciation & Fluency", "Public Speaking", "Grammar Foundation"],
       badge: "Most Popular"
     },
     {
-      title: "Deep English Learning",
-      category: "Advanced Language",
-      description: "Advanced grammar, complex sentence formation, comprehensive reading, and professional writing skills.",
-      skills: ["Advanced Grammar", "Essay & Letter Writing", "Comprehension", "Public Speaking"],
+      title: "Advanced English Learning",
+      category: "Professional & Academic Language",
+      description: "Advanced grammar, sentence structure, essay/letter writing, comprehension, and professional communication skills.",
+      skills: ["Advanced Grammar", "Writing Mastery", "Comprehension", "Personality Development"],
       badge: "Advanced"
     },
     {
-      title: "Nursery to Class 10 Academic Foundation",
-      category: "School Academics",
-      description: "Complete academic foundation across all subjects with concept-based learning and regular assessments.",
-      skills: ["Math & Science", "Concept Clarity", "Homework Support", "Exam Preparation"],
+      title: "Nursery to 12th Academic Coaching",
+      category: "School Academics (All Subjects)",
+      description: "Complete academic coaching from Nursery to 12th for CBSE & RBSE board exams, concept clarity, and regular weekly test series.",
+      skills: ["Math & Science", "Concept Clarity", "Board Exam Prep", "Homework & Test Support"],
       badge: "Core Program"
     },
     {
       title: "Free Computer Education",
-      category: "Digital Literacy",
-      description: "Essential computer operations, typing skills, office productivity tools, and digital literacy (Scholarship Test based).",
-      skills: ["Computer Basics", "Speed Typing", "MS Office / Docs", "Internet & Cyber Safety"],
-      badge: "Free via Test"
+      category: "Digital Skill Training",
+      description: "Essential computer typing, MS Office, internet basic operations, and practical digital literacy for local students.",
+      skills: ["Computer Basics", "Speed Typing", "MS Office / Docs", "Internet & Cyber Awareness"],
+      badge: "100% Free Program"
     }
   ];
 
@@ -45,14 +45,29 @@ export default function Courses() {
       <section className="bg-[#011F4B] text-white py-16 lg:py-20 text-center px-4">
         <div className="max-w-4xl mx-auto space-y-4">
           <span className="text-sky-400 font-semibold text-xs sm:text-sm uppercase tracking-wider">
-            — OUR EDUCATIONAL PROGRAMS
+            — GD DREAM CAREER EDUCATIONAL PROGRAMS
           </span>
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-            Explore Our Professional Courses
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+            Best Courses in Agra Road, Sumel & Bagrana Jaipur
           </h1>
           <p className="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            Nursery se Class 10 tak ke students ke liye designed high-quality academic, English, aur computer courses.
+            Nursery se Class 12th tak ke students ke liye top-quality Academic Coaching, Spoken English, aur Free Computer Education across Purani Chungi, Vijaypura, Sumel, and Bagrana (Jaipur 302031).
           </p>
+        </div>
+      </section>
+
+      {/* Institute Info Strip */}
+      <section className="bg-sky-50 py-6 border-b border-sky-100">
+        <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-between items-center text-xs text-gray-700 gap-4">
+          <div>
+            <strong>📍 Location:</strong> Agra Road, Sumel, Bagrana, Purani Chungi, Vijaypura, Jaipur 302031
+          </div>
+          <div>
+            <strong>📞 Admission Hotline:</strong> CEO Dev Sharma (<a href="tel:9982216542" className="text-sky-600 font-bold hover:underline">+91 9982216542</a>)
+          </div>
+          <div>
+            <strong>✨ Trust:</strong> 3+ Years of Academic Excellence (Founders: Sachin Sharma & Golu Saini)
+          </div>
         </div>
       </section>
 
@@ -70,13 +85,13 @@ export default function Courses() {
                     {course.category}
                   </span>
                 </div>
-                <h3 className="text-2xl font-bold text-[#011F4B] mb-3">{course.title}</h3>
+                <h2 className="text-2xl font-bold text-[#011F4B] mb-3">{course.title}</h2>
                 <p className="text-gray-700 text-sm leading-relaxed mb-6">
                   {course.description}
                 </p>
 
                 <div className="mb-6">
-                  <h4 className="text-xs font-bold text-[#011F4B] uppercase tracking-wider mb-2">Skills Covered:</h4>
+                  <h3 className="text-xs font-bold text-[#011F4B] uppercase tracking-wider mb-2">Skills & Features Covered:</h3>
                   <div className="flex flex-wrap gap-2">
                     {course.skills.map((skill, sIdx) => (
                       <span key={sIdx} className="bg-white text-gray-700 text-xs font-medium px-3 py-1 rounded-lg border border-sky-100">
@@ -98,11 +113,29 @@ export default function Courses() {
                   href="/contact" 
                   className="flex-1 bg-white hover:bg-sky-50 text-[#011F4B] border border-sky-300 text-center py-2.5 rounded-xl text-sm font-bold transition"
                 >
-                  Learn More
+                  Contact CEO Dev Sharma
                 </Link>
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Local Community CTA */}
+      <section className="bg-gray-50 py-12 border-t border-gray-200 text-center px-4">
+        <div className="max-w-3xl mx-auto space-y-4">
+          <h2 className="text-2xl font-bold text-[#011F4B]">Join Agra Road&apos;s Most Trusted Educational Institute</h2>
+          <p className="text-gray-600 text-sm">
+            Sumel, Bagrana, Vijaypura aur Purani Chungi ke students ke liye special batch timings available hain. Aaj hi contact karein aur demo class book karein!
+          </p>
+          <div className="pt-2">
+            <Link 
+              href="/contact" 
+              className="inline-block bg-[#011F4B] hover:bg-black text-white font-bold px-8 py-3 rounded-xl shadow transition"
+            >
+              Get Free Admission Counseling
+            </Link>
+          </div>
         </div>
       </section>
 

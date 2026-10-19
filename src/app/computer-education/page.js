@@ -16,11 +16,11 @@ export default function FreeComputerEducation() {
           <span className="text-sky-400 font-semibold text-xs sm:text-sm uppercase tracking-wider">
             — SCHOLARSHIP & DIGITAL SKILLS INITIATIVE
           </span>
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-            Free Computer Education Scheme
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+            Free Computer Education Scheme in Agra Road & Vijaypura Jaipur
           </h1>
-          <p className="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            GD Dream Career Institute ke sath sikhein essential digital literacy, typing, office tools, aur internet safety.
+          <p className="text-gray-300 text-sm sm:text-base max-w-3xl mx-auto leading-relaxed">
+            GD Dream Career Institute (Sumel, Bagrana, Purani Chungi, Vijaypura, Jaipur 302031) ke sath sikhein essential digital skills, typing, office tools, aur internet safety.
           </p>
         </div>
       </section>
@@ -30,13 +30,13 @@ export default function FreeComputerEducation() {
         <div className="bg-[#F0F9FF] border-2 border-sky-300 rounded-3xl p-8 sm:p-12 shadow-xl">
           <div className="text-center max-w-3xl mx-auto space-y-4">
             <span className="bg-[#011F4B] text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wide">
-              Selection Test Scheme
+              Scholarship Selection Test
             </span>
             <h2 className="text-2xl sm:text-4xl font-extrabold text-[#011F4B]">
               Get 100% Free Computer Education
             </h2>
             <p className="text-gray-700 text-sm sm:text-base">
-              Apni skills dikhiye aur Scholarship Test crack karke completely FREE Computer Coaching prapt karein!
+              Apni knowledge test karein aur Scholarship Test crack karke completely FREE Computer Coaching batch join karein!
             </p>
           </div>
 
@@ -66,7 +66,7 @@ export default function FreeComputerEducation() {
           {/* Test Syllabus Section */}
           <div className="mt-10 bg-white p-6 sm:p-8 rounded-2xl border border-sky-100">
             <h3 className="text-xl font-bold text-[#011F4B] mb-4 text-center sm:text-left">
-              📝 Test Paper Syllabus
+              📝 Selection Test Paper Syllabus
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-4 bg-sky-50 rounded-xl">
@@ -91,13 +91,16 @@ export default function FreeComputerEducation() {
             </div>
           </div>
 
-          {/* Apply Button */}
-          <div className="text-center mt-8">
+          {/* Contact & Registration Callout */}
+          <div className="text-center mt-8 space-y-3">
+            <p className="text-xs text-gray-600">
+              For Test Registration & Inquiry: <strong>CEO Dev Sharma (<a href="tel:9982216542" className="text-sky-600 hover:underline">+91 9982216542</a>)</strong>
+            </p>
             <Link 
               href="/contact" 
               className="bg-[#011F4B] hover:bg-black text-white font-bold px-8 py-3.5 rounded-xl shadow-lg transition inline-block text-sm sm:text-base"
             >
-              Register for ₹99 Test Now
+              Register for ₹99 Scholarship Test Now
             </Link>
           </div>
         </div>
@@ -106,7 +109,7 @@ export default function FreeComputerEducation() {
       {/* What You Will Learn in Computer Course */}
       <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-[#011F4B] text-center mb-10">
-          Course Coverage & Skills Taught
+          Computer Course Modules & Practical Skills
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="p-6 rounded-2xl bg-slate-50 border border-gray-200">
@@ -141,9 +144,20 @@ export default function FreeComputerEducation() {
 
           <div className="p-6 rounded-2xl bg-slate-50 border border-gray-200">
             <div className="text-3xl mb-3">💡</div>
-            <h3 className="font-bold text-[#011F4B] mb-2">Digital Literacy</h3>
-            <p className="text-xs sm:text-sm text-gray-600">Essential technology skills needed for school academics and career growth.</p>
+            <h3 className="font-bold text-[#011F4B] mb-2">Digital Literacy for Career</h3>
+            <p className="text-xs sm:text-sm text-gray-600">Essential technology skills needed for school academics, exams, and career growth.</p>
           </div>
+        </div>
+      </section>
+
+      {/* Location Banner */}
+      <section className="bg-sky-50 py-10 border-t border-sky-100 text-center px-4">
+        <div className="max-w-3xl mx-auto space-y-3">
+          <h3 className="text-xl font-bold text-[#011F4B]">Visit GD Dream Career Institute</h3>
+          <p className="text-xs sm:text-sm text-gray-600">
+            Location: Agra Road, Sumel, Bagrana, Purani Chungi, Vijaypura, Jaipur, Rajasthan 302031 (Plus Code: VWP7+HQ2)<br />
+            Founders: Sachin Sharma & Golu Saini | CEO: Dev Sharma (+91 9982216542)
+          </p>
         </div>
       </section>
 

@@ -36,10 +36,21 @@ export const metadata = {
   },
 };
 
+// <--- MOBILE STRETCH & RESPONSIVE VIEWPORT FIX --->
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#011F4B',
+};
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className="antialiased">{children}</body>
+    <html lang="en" className="h-full w-full">
+      <body className="antialiased min-h-screen w-full max-w-full overflow-x-hidden bg-white text-gray-800">
+        {children}
+      </body>
     </html>
   );
 }
