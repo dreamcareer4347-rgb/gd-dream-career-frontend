@@ -13,6 +13,9 @@ export const metadata = {
     icon: '/logo.png',
     apple: '/logo.png',
   },
+  other: {
+    'google-adsense-account': 'ca-pub-1386817715504553',
+  },
   keywords: [
     'coaching institute Sumel Bagrana Jaipur',
     'best institute Agra Road Jaipur 302031',
@@ -53,7 +56,7 @@ export default function RootLayout({ children }) {
         {/* Google AdSense Verification Script */}
         <Script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1386817715504553" // <-- Yahan apni AdSense Screen wali ca-pub- ID replace karein
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1386817715504553"
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
