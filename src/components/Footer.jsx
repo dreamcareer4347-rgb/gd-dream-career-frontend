@@ -38,18 +38,20 @@ export default function Footer() {
               <li><Link href="/about" className="hover:text-sky-400 transition">About Us</Link></li>
               <li><Link href="/courses" className="hover:text-sky-400 transition">Courses & Programs</Link></li>
               <li><Link href="/computer-education" className="hover:text-sky-400 transition">Free Computer Education</Link></li>
+              <li><Link href="/blog" className="hover:text-sky-400 transition">Blog & Articles</Link></li>
               <li><Link href="/performance" className="hover:text-sky-400 transition">Student Performance</Link></li>
               <li><Link href="/contact" className="hover:text-sky-400 transition">Contact & Admissions</Link></li>
             </ul>
           </div>
 
-          {/* Column 3: Core Programs */}
+          {/* Column 3: Legal & Core Programs */}
           <div>
-            <h3 className="text-white font-bold text-sm mb-3 tracking-wide">Primary Offerings</h3>
+            <h3 className="text-white font-bold text-sm mb-3 tracking-wide">Legal & Policies</h3>
             <ul className="space-y-2 text-xs">
-              <li className="hover:text-sky-400 transition">Nursery to 12th Coaching</li>
-              <li className="hover:text-sky-400 transition">Spoken English Confidence</li>
-              <li className="hover:text-sky-400 transition">Free Computer Education (₹99 Test)</li>
+              <li><Link href="/privacy-policy" className="hover:text-sky-400 transition">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-sky-400 transition">Terms & Conditions</Link></li>
+              <li className="text-sky-300 pt-2 font-semibold">Primary Offerings:</li>
+              <li className="text-gray-300">Nursery to 12th & Spoken English</li>
               <li className="text-[11px] text-sky-300 pt-1">📍 Sumel, Bagrana, Jaipur 302031</li>
             </ul>
           </div>
@@ -96,7 +98,7 @@ export default function Footer() {
           <span className="text-base">📊</span>
           <span className="text-[10px]">Portal</span>
         </Link>
-        <a href="tel:9982216542" className="flex flex-col items-center text-emerald-600 font-bold">
+        <a href="tel:9982216542" className="flex flex-col items-center text-sky-700 font-bold">
           <span className="text-base">📞</span>
           <span className="text-[10px]">Call CEO</span>
         </a>

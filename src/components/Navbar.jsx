@@ -12,6 +12,7 @@ export default function Navbar() {
     { name: 'About Us', href: '/about' },
     { name: 'Courses', href: '/courses' },
     { name: 'Free Computer Education', href: '/computer-education' },
+    { name: 'Blog', href: '/blog' },
     { name: 'Student Performance', href: '/performance' },
     { name: 'Contact', href: '/contact' },
   ];
