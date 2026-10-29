@@ -1,4 +1,5 @@
 import './globals.css';
+import Script from 'next/script';
 
 export const metadata = {
   title: 'Best Institute Nursery to 12th, English Speaking & Free Computer | GD Dream Career Sumel Bagrana Agra Road Jaipur',
@@ -48,6 +49,15 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="h-full w-full">
+      <head>
+        {/* Google AdSense Verification Script */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1386817715504553" // <-- Yahan apni AdSense Screen wali ca-pub- ID replace karein
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className="antialiased min-h-screen w-full max-w-full overflow-x-hidden bg-white text-gray-800">
         {children}
       </body>
